@@ -297,3 +297,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #saved { position: absolute; right: 18px; bottom: 14px; z-index: 40; font-family: 'IM Fell English SC', serif; color: #e8d0a0; background: rgba(20,10,4,.75); border: 1px solid rgba(201,161,74,.6); border-radius: 14px; padding: 3px 12px 3px 26px; font-size: 13px; opacity: 0; pointer-events: none; }
 #saved::before { content: ''; position: absolute; left: 9px; top: 50%; width: 10px; height: 10px; margin-top: -5px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #ffe9a8, #c9a14a); }
 #saved.show { animation: gt 1.6s; }
+
+.endings { display: flex; flex-wrap: wrap; gap: 5px; } .endings span { font-family: 'Cinzel', serif; font-size: 11px; padding: 3px 8px; border-radius: 10px; border: 1px dashed #b09060; color: #9a8a70; } .endings span.got { border-style: solid; background: rgba(232,195,90,.3); color: var(--ink); }

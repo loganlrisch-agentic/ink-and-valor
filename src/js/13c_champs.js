@@ -124,3 +124,6 @@ function champThink(b, e, dt) {
     moveToward(b, e, gx, gy, spd, dt); e.state = 'run';
   }
 }
+
+/* champions learn their calling's capstone spell too */
+for (const [k, id] of Object.entries({ brannoc: 'banner_of_the_watch', amberly: 'dawns_mercy', nim: 'thousand_cuts', vane: 'burn_the_witch', hessa: 'hurricane', pip: 'grand_finale', ulfgar: 'skullsplitter', ash: 'mountain_palm', fen: 'hags_moon', sable: 'mirror_of_night', quire: 'the_end', aldric: 'hammer_of_dawn', barrow_king: 'army_of_the_grave', vellum: 'chain_reaction' })) if (CHAMPS[k] && AB[id] && !CHAMPS[k].abil.includes(id)) CHAMPS[k].abil.push(id);

@@ -1,0 +1,52 @@
+/* ==========================================================================
+   Data III - Chapter II extras: the south road, Croakwater, the ghost ship,
+   the fighting pit, and the people and monsters you meet there.
+   ========================================================================== */
+Object.assign(CAST, {
+  mags: { rig: 'human', name: 'Mags', skin: SKINS[1], hair: { style: 'bun', color: '#8a4a2a' }, body: { type: 'dress', color: '#6a3a2a', trim: '#e8d8b0' }, offhand: { type: 'lantern', color: '#4a3a2a', color2: '#ffcf6a' }, face: 'kind', wide: 1.15 },
+  hanged: { rig: 'human', name: 'The Hanged Man', skin: '#a8b0a0', hair: { style: 'wild', color: '#3a3020' }, body: { type: 'rags', color: '#4a4434' }, face: 'sad', hunch: 0.3, legs: '#3a342a' },
+  refugee: { rig: 'human', name: 'Refugee Knight', skin: SKINS[2], hat: { type: 'helm', color: '#7a7a80' }, body: { type: 'armor', color: '#6a6a72', color2: '#4a2a2a' }, weapon: { type: 'sword', color: '#9a9aa0' }, face: 'sad' },
+  croaker: { rig: 'human', name: 'Croaker', skin: '#6a8a4a', face: 'goblin', hair: { style: 'bald', color: '#333' }, body: { type: 'rags', color: '#4a5a3a' }, weapon: { type: 'staff', color: '#5a4a2a' }, eyes: { color: '#ffd23a' }, hunch: 0.3, scale: 0.85 },
+  bulge: { rig: 'human', name: 'Grandmother Bulge', skin: '#7a9a5a', face: 'goblin', hair: { style: 'bald', color: '#333' }, body: { type: 'belly', color: '#5a6a3a' }, weapon: { type: 'staff', top: 'orb', color: '#5a4a2a', color2: '#a6ff5a' }, eyes: { color: '#ffd23a' }, hunch: 0.5, wide: 1.4, scale: 0.9 },
+  tadpole: { rig: 'human', name: 'Croakling', skin: '#8aaa5a', face: 'goblin', hair: { style: 'bald', color: '#333' }, body: { type: 'tunic', color: '#6a8a4a' }, eyes: { color: '#ffd23a' }, scale: 0.55 },
+  abbot: { rig: 'human', name: 'The Drowned Abbot', skin: '#9ab8c0', face: 'old', hair: { style: 'bald', color: '#888' }, beard: { style: 'long', color: '#c8d8d8' }, body: { type: 'robe', color: '#4a6070', trim: '#cfe8ff' }, weapon: { type: 'staff', top: 'orb', color: '#5a6a70', color2: '#9fe6ff' }, eyes: { color: '#9fe6ff', glow: true }, rimColor: '#9fe6ff' },
+  moss: { rig: 'human', name: 'Little Moss', skin: '#b8d0b0', hair: { style: 'braid', color: '#5a7a3a' }, body: { type: 'dress', color: '#cfe0c0', trim: '#7a9a5a' }, face: 'child', scale: 0.62, rimColor: '#a6ff5a' },
+  lampkeeper: { rig: 'human', name: 'Old Wick', skin: SKINS[0], hair: { style: 'wild', color: '#e8e8e8' }, beard: { style: 'full', color: '#e8e8e8' }, hat: { type: 'cap', color: '#2a3a5a' }, body: { type: 'coat', color: '#2a3a5a', color2: '#d8c890' }, offhand: { type: 'lantern', color: '#3a3a40', color2: '#fff2b0' }, face: 'old' },
+  priestess: { rig: 'human', name: 'Mother Undertow', skin: '#a8c0c8', hair: { style: 'long', color: '#2a4a5a' }, body: { type: 'robe', color: '#2a5a6a', trim: '#9fe6ff' }, weapon: { type: 'staff', top: 'hook', color: '#2a3a40', color2: '#4ab0c8' }, face: 'kind', eyes: { color: '#4ab0c8' } },
+  fishwife: { rig: 'human', name: 'Bessa Gill', skin: SKINS[1], hair: { style: 'bun', color: HAIRS[0] }, body: { type: 'dress', color: '#4a5a6a', trim: '#d8d0c0' }, face: 'stern', wide: 1.1 },
+  pitboss: { rig: 'human', name: 'Lord Gnash', skin: SKINS[3], hair: { style: 'mohawk', color: '#c8a030' }, body: { type: 'coat', color: '#3a2a54', color2: '#c9a14a' }, weapon: { type: 'staff', top: 'skull', color: '#2a2018', color2: '#c9a14a' }, face: 'stern', mouth: 'smirk', beard: { style: 'goatee', color: '#c8a030' } },
+});
+
+Object.assign(ENEMIES, {
+  tollman: { name: 'Toll Brother', cfg: { rig: 'human', skin: SKINS[2], hair: { style: 'bald', color: '#222' }, beard: { style: 'full', color: '#3a2a20' }, body: { type: 'vest', color: '#5a3a2a' }, weapon: { type: 'club', color: '#5a3a24' }, wide: 1.1 }, hp: 62, dmg: 9, cd: 1.6, speed: 64, range: 56, ai: 'melee', xp: 9, gold: [3, 7], r: 16 },
+  bogtoad: { name: 'Giant Bog Toad', cfg: { rig: 'inkspawn', color: '#5a7a3a', scale: 1.15 }, hp: 70, dmg: 9, cd: 1.7, speed: 62, range: 46, ai: 'hopper', xp: 9, gold: [1, 3], r: 18 },
+  wisp_queen: { name: 'The Wisp Queen', cfg: { rig: 'wisp', color: '#6fd0ff', scale: 2.2 }, hp: 420, dmg: 11, cd: 2.0, speed: 70, range: 300, ai: 'shaman', proj: 'hex', xp: 60, gold: [20, 30], r: 26, boss: true, flying: true },
+  drowned_sailor: { name: 'Drowned Sailor', cfg: { rig: 'human', skin: '#6a8a8a', face: 'ghoul', hat: { type: 'bandana', color: '#2a3a3a' }, body: { type: 'vest', color: '#2a3a3a', color2: '#4a5a5a' }, weapon: { type: 'sword', color: '#6a7a7a' }, eyes: { color: '#9fe6ff' }, legs: '#2a3232' }, hp: 62, dmg: 10, cd: 1.3, speed: 70, range: 52, ai: 'melee', xp: 9, gold: [3, 6], r: 15, undead: true },
+  drowned_captain: { name: 'Captain Hollis of the Widow’s Kiss', cfg: { rig: 'human', skin: '#5a7a7a', face: 'ghoul', hat: { type: 'tophat', color: '#1a2424', color2: '#9fe6ff' }, body: { type: 'coat', color: '#1a2a2a', color2: '#9fe6ff' }, weapon: { type: 'greataxe', color: '#4a5a5a' }, beard: { style: 'full', color: '#2a3a2a' }, eyes: { color: '#9fe6ff', glow: true }, scale: 1.3, wide: 1.15 }, hp: 520, dmg: 15, cd: 3.0, speed: 46, range: 92, ai: 'brute', xp: 70, gold: [40, 50], r: 30, undead: true, boss: true },
+});
+
+Object.assign(ITEMS, {
+  abbots_beads: { slot: 'offhand', name: 'Abbot’s Prayer Beads', def: 2, stats: { heart: 2 }, vis: { type: 'tome', color: '#4a6070', color2: '#cfe8ff' }, desc: 'Each bead is a name. You do not know any of them, and yet.' },
+  thornmail: { slot: 'body', name: 'Thornmail', def: 8, stats: { might: 1, heart: 1 }, vis: { type: 'armor', color: '#4a5a2a', color2: '#2a3a1a', trim: '#8fd060' }, desc: 'Living bark, grown in the shape of a breastplate. It flowers in spring.' },
+  wisplight: { slot: 'offhand', name: 'Wisplight Lantern', spell: 4, stats: { wits: 1 }, vis: { type: 'lantern', color: '#3a4a5a', color2: '#6fd0ff' }, desc: 'A captured wisp in a cage of reeds. It hums when it is happy.' },
+  gnash_helm: { slot: 'head', name: 'Pit Champion’s Helm', def: 5, stats: { might: 2 }, vis: { type: 'greathelm', color: '#5a4a3a', color2: '#c9a14a' }, desc: 'Dented in nine places. Each dent has a name and a story.' },
+  hollis_cutlass: { slot: 'weapon', name: 'The Widow’s Cutlass', wt: 'sword', dmg: 19, stats: { grace: 1 }, vis: { type: 'sword', color: '#9fd8d8', color2: '#1a2a2a' }, desc: 'It is always wet. Always. Nobody knows why.' },
+});
+Object.assign(ITEM_RARITY, { abbots_beads: 'rare', thornmail: 'rare', wisplight: 'rare', gnash_helm: 'epic', hollis_cutlass: 'epic' });
+
+Object.assign(BATTLES, {
+  tollmen: { scene: 'inn', title: 'The Toll Brothers', tier: 2.0, hero: { dx: -100, y: 450 }, waves: [[{ t: 'tollman', dx: 140, y: 400 }, { t: 'tollman', dx: 180, y: 500 }, { t: 'tollman', dx: -220, y: 460 }, { t: 'bandit_archer', dx: 320, y: 440 }]], party: 1 },
+  warrens: { scene: 'warrens', title: 'The Toad Warrens', tier: 1.8, hero: { dx: -100, y: 450 }, waves: [[{ t: 'bogtoad', dx: 140, y: 400 }, { t: 'bogtoad', dx: 180, y: 500 }, { t: 'mirespawn', dx: -220, y: 460 }, { t: 'bog_hag', dx: 320, y: 440 }], [{ t: 'bogtoad', edge: 1, y: 420 }, { t: 'bogtoad', edge: -1, y: 480 }, { t: 'bog_hag', dx: 300, y: 380 }]], party: 1 },
+  wisp_queen: { scene: 'fen', title: 'The Wisp Queen', boss: 'wisp_queen', tier: 1.6, hero: { dx: -180, y: 460 }, waves: [[{ t: 'wisp_queen', dx: 160, y: 420 }, { t: 'wisp', dx: 240, y: 380 }, { t: 'wisp', dx: 260, y: 500 }]], party: 1 },
+  scriptorium: { scene: 'monastery', title: 'The Flooded Scriptorium', tier: 1.9, hero: { dx: -100, y: 450 }, waves: [[{ t: 'drowned_monk', dx: 160, y: 400 }, { t: 'drowned_monk', dx: -220, y: 480 }, { t: 'mirespawn', dx: 200, y: 500 }], [{ t: 'drowned', edge: 1, y: 430 }, { t: 'drowned', edge: -1, y: 470 }, { t: 'mirespawn', edge: 1, y: 500 }]], party: 1 },
+  hunters: { scene: 'wood', title: 'Black Arrows', tier: 2.2, hero: { dx: -60, y: 450 }, waves: [[{ t: 'bog_hag', dx: 280, y: 400 }, { t: 'bog_hag', dx: 300, y: 500 }, { t: 'drowned', dx: 160, y: 450 }, { t: 'bogtoad', dx: -220, y: 470 }]], allies: [{ t: 'wolf', dx: -150, y: 400 }, { t: 'wolf', dx: -160, y: 500 }] },
+  island: { scene: 'island', title: 'Gloam’s Island', tier: 2.4, hero: { dx: -100, y: 450 }, waves: [[{ t: 'mirespawn', dx: 140, y: 400 }, { t: 'mirespawn', dx: 180, y: 500 }, { t: 'mirespawn', dx: -220, y: 450 }, { t: 'bogtoad', dx: 260, y: 440 }]], party: 1 },
+  ghostship: { scene: 'ghostship', title: 'The Widow’s Kiss', tier: 2.0, hero: { dx: -120, y: 450 }, waves: [[{ t: 'drowned_sailor', dx: 140, y: 400 }, { t: 'drowned_sailor', dx: 180, y: 500 }, { t: 'drowned_sailor', dx: -220, y: 450 }], [{ t: 'drowned_captain', dx: 200, y: 450 }, { t: 'drowned_sailor', edge: 1, y: 400 }, { t: 'drowned_sailor', edge: -1, y: 500 }]], party: 1 },
+  pit1: { scene: 'pit', title: 'The Pit: First Bout', tier: 2.3, nonlethal: true, hero: { dx: -140, y: 450 }, waves: [[{ t: 'cutpurse', dx: 140, y: 410 }, { t: 'cutpurse', dx: 160, y: 490 }, { t: 'guild_bruiser', dx: 240, y: 450 }]] },
+  pit2: { scene: 'pit', title: 'The Pit: Second Bout', tier: 2.4, nonlethal: true, hero: { dx: -140, y: 450 }, waves: [[{ t: 'salt_guard', dx: 140, y: 410 }, { t: 'salt_guard', dx: 160, y: 490 }, { t: 'bandit_archer', dx: 320, y: 420 }, { t: 'bandit_archer', dx: 330, y: 500 }]] },
+  pit3: { scene: 'pit', title: 'The Pit: Red Agatha', boss: 'agatha_c', champHp: 1.6, tier: 2.0, nonlethal: true, hero: { dx: -140, y: 450 }, waves: [[{ t: 'agatha_c', dx: 150, y: 450 }, { t: 'cutpurse', dx: 260, y: 400 }, { t: 'cutpurse', dx: 270, y: 500 }]] },
+});
+
+ENEMIES.ink_kraken = { name: 'The Margin Kraken', cfg: { rig: 'inkspawn', big: true, color: '#1a1830', scale: 2.0 }, hp: 760, dmg: 16, cd: 3.0, speed: 34, range: 110, ai: 'brute', xp: 90, gold: [40, 60], r: 44, inkborn: true, boss: true, splits: 'inkspawn' };
+BATTLES.kraken = { scene: 'deck', title: 'Something in the Water', boss: 'ink_kraken', tier: 2.0, hero: { dx: -200, y: 460 }, waves: [[{ t: 'ink_kraken', dx: 160, y: 440 }, { t: 'inkspawn', dx: 260, y: 380 }, { t: 'inkspawn', dx: 280, y: 510 }]], party: 2 };
+BATTLES.library_b = { scene: 'library', title: 'The Library of Teeth', tier: 3.4, hero: { dx: -100, y: 450 }, waves: [[{ t: 'bookworm', dx: 140, y: 400 }, { t: 'bookworm', dx: 170, y: 500 }, { t: 'ink_scribe', dx: 320, y: 450 }], [{ t: 'errata_soldier', edge: 1, y: 420 }, { t: 'errata_soldier', edge: -1, y: 480 }, { t: 'margin_hound', edge: 1, y: 500 }]], party: 3 };

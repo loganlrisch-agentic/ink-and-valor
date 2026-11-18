@@ -1,6 +1,6 @@
 import base64, sys, os, re
 ROOT = os.path.dirname(os.path.abspath(__file__))
-ORDER = ['00_core','01_audio','02_art','03_kit3d','04_models','05_world','06_data','06b_data2','07_hero','08_story','08b_story1x','08c_story2','08d_story3','08e_story4','09_chapters','10_r3d','11_battle','12_bview','13_skills','13c_champs','14_hud','15_book','16_main']
+ORDER = ['00_core','01_audio','02_art','03_kit3d','04_models','05_world','06_data','06b_data2','06c_data3','07_hero','08_story','08b_story1x','08c_story2','08d_story3','08c2_story2x','08e_story4','09_chapters','10_r3d','11_battle','12_bview','13_skills','13c_champs','14_hud','15_book','16_main']
 FONTS = [('IM Fell English','fell.woff2','normal','normal'),('IM Fell English','fell-italic.woff2','normal','italic'),('IM Fell English SC','fell-sc.woff2','normal','normal'),('Cinzel','cinzel.woff2','700','normal'),('Grenze Gotisch','grenze.woff2','800','normal')]
 CDN = 'https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/'
 EX = ['shaders/CopyShader.js','shaders/LuminosityHighPassShader.js','postprocessing/EffectComposer.js','postprocessing/RenderPass.js','postprocessing/ShaderPass.js','postprocessing/UnrealBloomPass.js']

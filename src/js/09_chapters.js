@@ -1,5 +1,6 @@
 /* ==========================================================================
-   Chapters - the four parts of the book, and the shuffled section numbers
+   Chapters - the four parts of the book, and the shuffled section numbers.
+   Section ids are grouped in ranges; each range belongs to one chapter.
    ========================================================================== */
 const CHAPTERS = {
   I: { num: 'I', title: 'The Unending Night', start: 1, teaser: '' },
@@ -7,18 +8,20 @@ const CHAPTERS = {
   III: { num: 'III', title: 'The Library of Teeth', start: 300, teaser: 'The Folio: a city of paper towers, red soldiers and a Library with a mouth. The man with the shears is very close now.' },
   IV: { num: 'IV', title: 'The Last Page', start: 400, teaser: 'Behind the black door is the Bindery, and in the Bindery is the man who cut the endings out of the world.' },
 };
-function chapterOf(id) { id = +id || 0; return id >= 400 ? CHAPTERS.IV : id >= 300 ? CHAPTERS.III : id >= 200 ? CHAPTERS.II : CHAPTERS.I; }
+const CHAPTER_RANGES = [[0, 199, 'I'], [200, 299, 'II'], [600, 699, 'II'], [300, 399, 'III'], [700, 799, 'III'], [400, 599, 'IV'], [800, 899, 'IV']];
+function chapterOf(id) { id = +id || 0; for (const [lo, hi, k] of CHAPTER_RANGES) if (id >= lo && id <= hi) return CHAPTERS[k]; return CHAPTERS.I; }
 
-/* gamebook-style shuffled section numbers; each chapter gets its own range */
+/* gamebook-style shuffled section numbers; each chapter gets its own block of numbers */
 const DISPLAY = (() => {
   const m = { 0: 0, 1: 1 };
-  const ranges = [[2, 199, 2, 260, 1913, null], [200, 299, 261, 400, 2026, 200], [300, 399, 401, 520, 1066, 300], [400, 499, 521, 600, 1492, 400]];
-  for (const [lo, hi, a, b, seed, start] of ranges) {
-    const ids = Object.keys(SECTIONS).map(Number).filter((n) => n >= lo && n <= hi && n > 1 && n !== start).sort((x, y) => x - y);
+  const blocks = { I: [2, 299, 1913], II: [300, 599, 2026], III: [600, 899, 1066], IV: [900, 1199, 1492] };
+  for (const k of Object.keys(blocks)) {
+    const [a, b, seed] = blocks[k], start = CHAPTERS[k].start;
+    const ids = Object.keys(SECTIONS).map(Number).filter((n) => n > 1 && chapterOf(n).num === k && n !== start).sort((x, y) => x - y);
     const r = mulberry32(seed), pool = [];
-    for (let i = start ? a + 1 : a; i <= b; i++) pool.push(i);
+    for (let i = start > 1 ? a + 1 : a; i <= b; i++) pool.push(i);
     for (let i = pool.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [pool[i], pool[j]] = [pool[j], pool[i]]; }
-    if (start) m[start] = a;
+    if (start > 1) m[start] = a;
     ids.forEach((id, i) => { m[id] = pool[i]; });
   }
   return m;

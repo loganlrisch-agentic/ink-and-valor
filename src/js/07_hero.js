@@ -119,7 +119,7 @@ function fixBelt(st) {
   }
 }
 
-function xpNeeded(level) { return 20 + (level - 1) * 22; }
+function xpNeeded(level) { const k = level - 1; return 20 + k * 35 + k * k * 2; }
 function gainXp(st, n) {
   const h = st.hero; let lv = 0;
   h.xp += n;

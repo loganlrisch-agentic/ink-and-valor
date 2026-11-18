@@ -312,6 +312,58 @@ const World = (() => {
       for (const s of [-1, 1]) { const g = f.at(0, 3.2, 0, 0, 0, s * 0.32); g.metal(G.rbox(0.28, 3.4, 0.08, 0.04), '#d8dce4', 0, 1.2, 0); g.metal(G.torus(0.08, PI * 2, 14), '#c9a14a', 0, -0.95, 0, 0, 0, 0, 0.45, 0.45, 0.45); }
       f.metal(G.sphere(8), '#c9a14a', 0, 3.2, 0.08, 0, 0, 0, 0.14, 0.14, 0.14);
     },
+    gibbet(f, r, o) {
+      f.put(G.rbox(0.3, 4.2, 0.3, 0.04), woodD, 0, 2.1, 0, 0, 0, 0.03);
+      f.put(G.rbox(2.0, 0.26, 0.26, 0.04), woodD, 0.85, 4.0, 0);
+      f.put(G.rbox(0.18, 1.2, 0.18, 0.03), woodD, 0.35, 3.45, 0, 0, 0, -0.8);
+      f.flat(G.cyl(1, 1, 3), '#6a5a40', 1.6, 3.5, 0, 0, 0, 0, 0.015, 1.0, 0.015);
+      if (o.cage !== false) { for (let i = 0; i < 8; i++) { const a = i * PI / 4; f.metal(G.cyl(1, 1, 4), iron, 1.6 + Math.cos(a) * 0.35, 2.4, Math.sin(a) * 0.35, 0, 0, 0, 0.02, 1.6, 0.02); } f.metal(G.torus(0.03, PI * 2, 12), iron, 1.6, 3.2, 0, PI / 2, 0, 0, 0.36, 0.36, 0.36); f.metal(G.torus(0.03, PI * 2, 12), iron, 1.6, 1.6, 0, PI / 2, 0, 0, 0.36, 0.36, 0.36); }
+      f.put(G.ico(1), stone, 0, 0.15, 0, 0, 0, 0, 0.5, 0.3, 0.5);
+    },
+    lighthouse(f, r, o, info) {
+      const h = o.h || 11;
+      for (let k = 0; k < 6; k++) f.put(G.cyl(0.92, 1, 14), k % 2 ? '#e8e0d0' : '#8a2a2a', 0, k * h / 6 + h / 12, 0, 0, 0, 0, 1.3 - k * 0.08, h / 6, 1.3 - k * 0.08, { grad: [0.6, 1.05] });
+      f.metal(G.cyl(1, 1, 12), iron, 0, h + 0.1, 0, 0, 0, 0, 1.0, 0.2, 1.0);
+      f.glow(G.cyl(1, 1, 12), o.c || '#fff2b0', 0, h + 0.8, 0, 0, 0, 0, 0.7, 1.2, 0.7, 2.6);
+      f.put(G.cone(12), '#2a2a30', 0, h + 1.9, 0, 0, 0, 0, 0.95, 0.9, 0.95);
+      info.light = { x: 0, y: h + 0.8, z: 2, c: o.c || '#fff2b0', i: 1.6, d: 14 };
+    },
+    vat(f, r, o, info) {
+      f.metal(G.cyl(1, 1, 16), o.color || '#3a3a44', 0, 1.1, 0, 0, 0, 0, 1.2, 2.2, 1.2);
+      for (const y of [0.4, 1.8]) f.metal(G.torus(0.06, PI * 2, 18), iron, 0, y, 0, PI / 2, 0, 0, 1.22, 1.22, 1.22);
+      f.glow(G.cyl(1, 1, 16), o.c || '#3a2a6a', 0, 2.21, 0, 0, 0, 0, 1.1, 0.02, 1.1, 1.2);
+      f.metal(G.cyl(1, 1, 8), iron, 1.4, 2.6, 0, 0, 0, 0.6, 0.12, 1.6, 0.12);
+      for (const s of [-1, 1]) f.put(G.rbox(0.2, 0.6, 0.2, 0.02), iron, s * 0.9, 0.3, 0.9);
+      if (o.lit !== false) info.light = { x: 0, y: 2.6, z: 0, c: o.c || '#6a4aff', i: 0.6, d: 5 };
+    },
+    gear(f, r, o) {
+      const R0 = o.r || 1.6, n = Math.round(R0 * 8), c = o.color || '#9a7a3a';
+      const g = f.at(0, R0 + 0.2, 0, 0, 0, 0);
+      g.metal(G.torus(0.16, PI * 2, 28), c, 0, 0, 0, 0, 0, 0, R0, R0, R0 * 1.4);
+      for (let i = 0; i < n; i++) { const a = i * PI * 2 / n; g.metal(G.rbox(0.3, 0.32, 0.22, 0.03), c, Math.cos(a) * (R0 + 0.22), Math.sin(a) * (R0 + 0.22), 0, 0, 0, a); }
+      for (let i = 0; i < 4; i++) g.metal(G.rbox(0.14, R0 * 2, 0.14, 0.02), shade(c, -0.1), 0, 0, 0, 0, 0, i * PI / 4);
+      g.metal(G.sphere(10), shade(c, 0.1), 0, 0, 0, 0, 0, 0, 0.3, 0.3, 0.3);
+      f.put(G.rbox(0.4, R0 + 0.3, 0.4, 0.04), iron, 0, (R0 + 0.3) / 2, -0.3);
+    },
+    clocktower(f, r, o, info) {
+      const h = o.h || 9, w = o.w || 2.6, c = o.color || '#6a5a4a';
+      f.put(G.rbox(w, h, w, 0.08), c, 0, h / 2, 0, 0, 0, 0, 1, 1, 1, { grad: [0.55, 1.05] });
+      f.glow(G.cyl(1, 1, 24), '#f8e8b0', 0, h - 1.4, w / 2 + 0.04, PI / 2, 0, 0, w * 0.36, 0.05, w * 0.36, 1.4);
+      f.flat(G.rbox(0.06, w * 0.3, 0.04, 0.01), '#1a1418', 0, h - 1.4 + w * 0.12, w / 2 + 0.1);
+      f.flat(G.rbox(0.05, w * 0.22, 0.04, 0.01), '#1a1418', -w * 0.06, h - 1.4 + w * 0.08, w / 2 + 0.1, 0, 0, 0.6);
+      f.put(G.cone(4), o.roof || '#3a3a5a', 0, h + 1.3, 0, 0, PI / 4, 0, w * 0.78, 2.6, w * 0.78, { grad: [0.6, 1.1] });
+      info.light = { x: 0, y: h - 1.4, z: w / 2 + 1.5, c: '#f8e8b0', i: 0.8, d: 8 };
+    },
+    cage(f, r, o) {
+      const s = o.s || 1;
+      f.metal(G.rbox(1.6 * s, 0.12, 1.6 * s, 0.02), iron, 0, 0.06, 0); f.metal(G.rbox(1.6 * s, 0.12, 1.6 * s, 0.02), iron, 0, 2.0 * s, 0);
+      for (let i = 0; i < 6; i++) for (const z of [-0.75, 0.75]) f.metal(G.cyl(1, 1, 4), iron, (-0.75 + i * 0.3) * s, s, z * s, 0, 0, 0, 0.03, 2 * s, 0.03);
+      for (let i = 1; i < 5; i++) for (const x of [-0.75, 0.75]) f.metal(G.cyl(1, 1, 4), iron, x * s, s, (-0.75 + i * 0.3) * s, 0, 0, 0, 0.03, 2 * s, 0.03);
+      if (o.ink) f.put(G.sphere(12), '#0a0c18', 0, 0.3, 0, 0, 0, 0, 0.6 * s, 0.3, 0.6 * s);
+    },
+    paperflower(f, r, o) {
+      for (let i = 0; i < 5; i++) { const x = (r() - 0.5) * 1.2, z = (r() - 0.5) * 0.8, h = 0.5 + r() * 0.9; f.put(G.cyl(1, 1, 4), '#4a5a3a', x, h / 2, z, 0, 0, (r() - 0.5) * 0.2, 0.02, h, 0.02, { ow: 0.1 }); for (let k = 0; k < 5; k++) f.put(G.rbox(0.22, 0.02, 0.1, 0.005), o.c || (r() < 0.5 ? '#efe6d2' : '#e8b8c8'), x + Math.cos(k * 1.26) * 0.1, h, z + Math.sin(k * 1.26) * 0.1, 0, k * 1.26, 0.4, 1, 1, 1, { ow: 0.08 }); }
+    },
   };
 
   /* ---------------- painted ground (soft, low-contrast, tileable) ---------------- */
@@ -322,6 +374,8 @@ const World = (() => {
     dirt: ['#7a6448', ['#8a7254', '#62503a', '#806a4a', '#6a5a40'], '#9a8a6a'],
     mud: ['#5e5040', ['#6a5a48', '#4a3e30', '#665a44', '#56483a'], '#8a7a62'],
     bog: ['#3e4c34', ['#4a5a3a', '#2e3a26', '#56603a', '#3a4430'], '#7a8a4a'],
+    snow: ['#d8dce4', ['#e8ecf2', '#c8ccd6', '#f0f2f6', '#b8bcc8'], '#9aa0b0'],
+    white: ['#ece6d8', ['#f2ece0', '#e0d8c8', '#f6f2ea', '#d8d0c0'], '#c8c0b0'],
     paper: ['#b8ad94', ['#c8bea6', '#a89c82', '#d0c4aa', '#9a8e76'], '#5a4a6a'],
   };
   function paintGround(kind) {
@@ -574,6 +628,34 @@ const World = (() => {
     fog: ['#100608', 14, 40], hemi: ['#d0a0b0', '#140a0c', 0.45], key: ['#ffd8c8', 0.5, 3, 9, 6], particles: 'embers', tint: '#ff6a4a',
     build(add) { add('bigbook', 0, -8.5, { o: { c: '#ffd8a0' } }); add('shears', 0, -11.6); add('press', -8, -8.5, { ry: 0.3 }); add('press', 8, -8.5, { ry: -0.3 }); for (const s of [-1, 1]) { add('pillar', s * 12, -8, { o: { h: 6, color: '#5a4a50' } }); add('pages', s * 6, -4.5, { seed: s + 3, o: { L: 7, y: 5.4, ink: '#5a1a18' } }); add('candles', s * 3.5, -7.5, { seed: s + 7 }); } add('inkpool', -4, -3, { seed: 2, o: { s: 1.2 } }); add('inkpool', 5, -2, { seed: 4, o: { s: 0.9 } }); },
   };
+
+
+  /* ---------- Chapter II extras ---------- */
+  SCENES.crossroads = Object.assign({}, SCENES.moor, { build(add) { add('gibbet', 2, -8.5, { seed: 1 }); add('deadtree', -11, -8, { seed: 4, s: 1.2 }); add('deadtree', 12, -9, { seed: 7 }); for (let i = 0; i < 10; i++) add(i % 2 ? 'tuft' : 'heather', -14 + i * 3, -6 - (i % 3), { seed: i + 3 }); add('fence', -8, -6.5, { ry: 0.1, o: { L: 4 } }); add('fence', 9, -6.8, { ry: -0.1, o: { L: 4 } }); add('rock', 13, 0, { seed: 2 }); add('lamp', -4.5, -6.2, { o: { c: '#ffb050' } }); } });
+  SCENES.inn = Object.assign({}, SCENES.tavern, { hemi: ['#e8c090', '#3a2418', 0.55], build(add) { add('hearth', -2, -9); add('table', -9, -5, { o: { L: 2.4 } }); add('table', 8, -5.5, { o: { L: 2.4 } }); add('table', 0, -4, { o: { L: 2 } }); for (const [x, z] of [[-9, -3.6], [-10.5, -6.4], [8, -4.1], [9.6, -6.9], [-1.4, -2.6], [1.4, -2.6]]) add('stool', x, z); add('barrel', 12.5, -8); add('barrel', 13, -7.2); add('crate', -12.6, -8, { seed: 2 }); add('bench', 12, -3, { ry: -PI / 2, o: { L: 2.4 } }); add('candles', -9, -5, { seed: 1 }); add('candles', 8, -5.5, { seed: 4 }); add('banner', 6, -9, { o: { color: '#5a3a22', c2: '#ffcf6a' } }); } });
+  SCENES.croakwater = Object.assign({}, SCENES.fen, { build(add) { add('stilthouse', -10, -10.5, { seed: 2, o: { lc: '#a6ff5a', roof: '#2a3a24', wall: '#4a5a3a' } }); add('stilthouse', -2, -12, { seed: 3, o: { lc: '#ffb050', roof: '#3a4a2a', wall: '#5a5a3a' } }); add('stilthouse', 7, -11, { seed: 5, ry: -0.2, o: { lc: '#9fe6ff', roof: '#2a3a2a', wall: '#4a4a3a' } }); add('stilthouse', 14.5, -7, { seed: 6, ry: -1.1, o: { roof: '#2a3a24' } }); add('dock', 0, -6.8, { o: { L: 12, D: 1.6 } }); add('lanterns', -5, -7.4, { seed: 3, o: { L: 7, cols: ['#a6ff5a', '#9fe6ff', '#ffd070', '#a6ff5a'] } }); add('lilies', 4, -8.5, { seed: 6 }); add('lilies', -12, -7, { seed: 2 }); add('reeds', 12, -6, { seed: 4 }); add('reeds', -14, -5, { seed: 8 }); } });
+  SCENES.warrens = { outdoor: false, ground: 'mud', groundC: '#3a3a28', walls: { tex: 'hide', c: '#3a3a28' }, fog: ['#0c1408', 12, 34], hemi: ['#a0c080', '#141a10', 0.42], key: ['#c0ff90', 0.35, 3, 9, 6], particles: 'wisps', tint: '#a6ff5a', build(add) { add('inkpool', -6, -6, { seed: 2, o: { s: 1.4 } }); add('inkpool', 7, -5, { seed: 4, o: { s: 1.1 } }); add('mushroom', -11, -7, { seed: 3, o: { c: '#a6ff5a' } }); add('mushroom', 11, -8, { seed: 5, o: { c: '#a6ff5a' } }); add('skulls', 0, -8.5, { seed: 6 }); add('cage', 10, -8.6, { seed: 1, o: { s: 0.9 } }); add('cage', -10, -8.8, { seed: 2, o: { s: 0.9 } }); add('candles', 2, -8, { seed: 2 }); add('reeds', -13, -3, { seed: 9 }); } };
+  SCENES.island = Object.assign({}, SCENES.fen, { build(add) { add('stilthouse', 0, -11.5, { seed: 9, o: { lift: 0.6, lc: '#a6ff5a', roof: '#1a2a1a', wall: '#3a3a2a', skull: true } }); add('inkpool', -6, -6.5, { seed: 5, o: { s: 1.6 } }); add('pages', 6, -7.5, { seed: 2, o: { L: 5, y: 3.4, ink: '#2a4a2a' } }); add('deadtree', -12, -8, { seed: 2, s: 1.3 }); add('deadtree', 12, -9, { seed: 6, s: 1.1 }); add('mushroom', -9, -9, { seed: 7, o: { c: '#a6ff5a' } }); add('reeds', 10, -6, { seed: 3 }); add('candles', -2, -8, { seed: 4 }); } });
+  SCENES.temple = Object.assign({}, SCENES.chapel, { walls: { tex: 'stone', c: '#5a7a80', window: '#4ab0c8' }, hemi: ['#90c8d8', '#1a2428', 0.5], key: ['#b8f0ff', 0.6, -3, 9, 6], tint: '#4ab0c8', build(add) { add('altar', 0, -9); add('statue', 0, -10.6, { seed: 2, o: { color: '#4a7a80' } }); add('inkpool', 0, -5.5, { seed: 3, o: { s: 1.5 } }); add('pillar', -10, -8, { o: { h: 6, color: '#5a7a80' } }); add('pillar', 10, -8, { o: { h: 6, color: '#5a7a80' } }); add('candles', -4, -8.5, { seed: 2 }); add('candles', 4, -8.5, { seed: 5 }); add('lilies', -6, -4, { seed: 3 }); add('lilies', 6, -4.5, { seed: 7 }); } });
+  SCENES.pit = { outdoor: false, ground: 'dirt', groundC: '#6a5440', walls: { tex: 'timber', c: '#5a4a3a' }, fog: ['#1a120c', 16, 40], hemi: ['#e0b890', '#2a1c14', 0.5], key: ['#ffc890', 0.55, 3, 9, 6], particles: 'embers', build(add) { add('palisade', 0, -10.5, { o: { L: 26 } }); add('palisade', -14, -3, { ry: PI / 2, o: { L: 10 } }); add('palisade', 14, -3, { ry: PI / 2, o: { L: 10 } }); for (const x of [-9, -3, 3, 9]) add('torch', x, -9.2); add('banner', -6, -9.6, { o: { color: '#3a2a54' } }); add('banner', 6, -9.6, { o: { color: '#2a5a7a' } }); add('skulls', 11, -8, { seed: 2 }); add('barrel', -12, -8); add('cage', 12, -6, { seed: 3, o: { s: 0.8 } }); } };
+  SCENES.lighthouse = Object.assign({}, SCENES.saltmere, { build(add) { add('lighthouse', 4, -12.5); add('rock', -9, -9, { seed: 3, o: { s: 2.4, color: '#5a5a62' } }); add('rock', 13, -8, { seed: 5, o: { s: 2, color: '#5a5a62' } }); add('rock', -14, -4, { seed: 7, o: { s: 1.6, color: '#5a5a62' } }); add('dock', -4, -7.6, { o: { L: 6, D: 1.4 } }); add('boat', -6, -10, { ry: 1.2 }); add('barrel', 10, -5); add('lamp', -1, -6.3, { o: { c: '#fff2b0' } }); } });
+  SCENES.ghostship = Object.assign({}, SCENES.deck, { fog: ['#14281e', 10, 36], hemi: ['#8ad8b0', '#141a14', 0.5], key: ['#a8ffd0', 0.6, -6, 10, 4], particles: 'wisps', tint: '#7bd389', build(add) { add('ship', 0, -13, { seed: 5 }); add('barrel', -11, -6); add('skulls', -9, -5, { seed: 4 }); add('crate', 11, -5.5, { seed: 6 }); add('lanterns', 0, -7.4, { seed: 9, o: { L: 12, cols: ['#7bd389', '#9fe6ff', '#7bd389', '#a6ff5a'] } }); add('fence', -13.5, 0, { ry: PI / 2, o: { L: 6, color: '#2a2a20' } }); add('fence', 13.5, 0, { ry: PI / 2, o: { L: 6, color: '#2a2a20' } }); add('pages', 4, -6, { seed: 6, o: { L: 4, y: 3.6, ink: '#2a4a3a' } }); } });
+  /* ---------- Chapter III extras ---------- */
+  SCENES.correction = { outdoor: false, ground: 'flag', groundC: '#5a4a50', walls: { tex: 'stone', c: '#4a3a40' }, fog: ['#140a0c', 14, 38], hemi: ['#d0a0a8', '#180c0e', 0.45], key: ['#ffc0c0', 0.5, 3, 9, 6], particles: 'motes', tint: '#ff4a3a', build(add) { add('vat', -8, -8.5, { seed: 1, o: { c: '#5a0a14' } }); add('vat', 8, -8.5, { seed: 2, o: { c: '#5a0a14' } }); add('cage', -12.5, -5, { seed: 1, o: { ink: true } }); add('cage', 12.5, -5, { seed: 2, o: { ink: true } }); add('table', 0, -7, { o: { L: 3, mugs: false } }); add('candles', 0, -7, { seed: 4 }); add('banner', -3, -9.5, { o: { color: '#6a1a18', c2: '#0a0606' } }); add('banner', 3, -9.5, { o: { color: '#6a1a18', c2: '#0a0606' } }); add('pages', 0, -4.5, { seed: 8, o: { L: 9, y: 5.2, ink: '#6a1a18' } }); } };
+  SCENES.inkworks = { outdoor: false, ground: 'flag', groundC: '#3a3440', walls: { tex: 'stone', c: '#3a3440' }, fog: ['#0a080e', 14, 38], hemi: ['#9a90c8', '#100c14', 0.42], key: ['#c0b0ff', 0.45, 3, 9, 6], particles: 'embers', tint: '#6a4aff', build(add) { for (let i = 0; i < 4; i++) add('vat', -10.5 + i * 7, -9, { seed: i + 1, o: { c: i % 2 ? '#2a1a6a' : '#1a1a3a' } }); add('press', -12.5, -4, { ry: 0.8 }); add('press', 12.5, -4, { ry: -0.8 }); add('inkpool', 0, -5, { seed: 2, o: { s: 1.5 } }); add('inkpool', -6, -3, { seed: 7, o: { s: 0.8 } }); add('crate', 11, -7, { seed: 4 }); add('barrel', -11, -7); } };
+  SCENES.underfolio = Object.assign({}, SCENES.cellar, { water: { z: -5, w: 30, d: 3, y: 0.05, c: 0x2a2a3a }, build(add) { for (let i = 0; i < 5; i++) add('pillar', -12 + i * 6, -9, { o: { h: 5, color: '#4a4448' } }); add('pages', -6, -7, { seed: 3, o: { L: 6, y: 4.4 } }); add('pages', 6, -7.2, { seed: 5, o: { L: 6, y: 4.2 } }); add('crate', -12, -3, { seed: 2 }); add('barrel', 12, -3); add('candles', -2, -8.5, { seed: 6 }); add('skulls', 9, -8, { seed: 2 }); } });
+  SCENES.tomb = Object.assign({}, SCENES.crypt, { tint: '#ffd8a0', key: ['#ffe8c0', 0.45, 3, 9, 6], build(add) { add('sarcophagus', 0, -8.5, { ry: 0 }); add('shears', 0, -11, { seed: 2 }); for (const s of [-1, 1]) { add('pillar', s * 7, -8.5, { o: { h: 5.5 } }); add('candles', s * 3, -8, { seed: s + 4 }); add('bookshelf', s * 11.5, -9.5, { seed: s + 2, o: { h: 3.6 } }); } add('pages', 0, -5.5, { seed: 2, o: { L: 8, y: 5 } }); } });
+  SCENES.gardens = Object.assign({}, SCENES.folio, { build(add) { for (let i = 0; i < 8; i++) add('paperflower', -13 + i * 3.7, -7.5 - (i % 2) * 1.6, { seed: i + 1, o: i % 3 === 0 ? { c: '#e8b8c8' } : {} }); add('statue', -6, -10, { seed: 2, o: { color: '#d8ccb0' } }); add('statue', 6, -10, { seed: 3, o: { color: '#d8ccb0', book: true } }); add('tower', 0, -14, { seed: 6, o: { h: 12, roof: '#5a1a18' } }); add('lanterns', 0, -6.8, { seed: 4, o: { L: 10, cols: ['#ffd070', '#ffb0c0', '#efe6d2', '#ffd070'] } }); add('paperflower', -12, -3, { seed: 11 }); add('paperflower', 12, -3, { seed: 12, o: { c: '#e8b8c8' } }); } });
+  SCENES.vault = Object.assign({}, SCENES.hall, { walls: { tex: 'stone', c: '#6a5a40' }, hemi: ['#f0d8a0', '#2a2010', 0.5], key: ['#ffe0a0', 0.55, -3, 9, 6], build(add) { for (let i = 0; i < 5; i++) add('treasure', -10 + i * 5, -8.5 - (i % 2) * 0.8, { seed: i + 2 }); add('pillar', -12.5, -6, { o: { h: 6, color: '#a08850' } }); add('pillar', 12.5, -6, { o: { h: 6, color: '#a08850' } }); add('shelf', -6, -10.2, { seed: 3 }); add('shelf', 6, -10.2, { seed: 5 }); add('chandelier', 0, -5, { o: { c: '#ffd070' } }); add('rug', 0, -4, { o: { w: 3, L: 7, color: '#6a1a18' } }); } });
+  SCENES.stacks = Object.assign({}, SCENES.library, { build(add) { for (let i = 0; i < 7; i++) add('bookshelf', -13 + i * 4.3, -9.4 - (i % 2) * 0.8, { seed: i + 20, o: { h: 5, eyes: i % 3 === 1 } }); for (const s of [-1, 1]) add('bookshelf', s * 12.5, -3, { seed: s + 30, ry: s * -PI / 2, o: { h: 4.6 } }); add('candles', -3, -6.5, { seed: 2 }); add('candles', 3, -6.5, { seed: 5 }); add('pages', 0, -4, { seed: 7, o: { L: 9, y: 5.6 } }); } });
+  /* ---------- Chapter IV extras ---------- */
+  const PALE = { sky: ['#c8ccd8', '#dcdfe8', '#eceef4'], stars: 0, layers: [{ type: 'mountains', c: '#b0b4c4', base: 0.74, amp: 0.25, seed: 9 }, { type: 'trees', c: '#9a9eb0', base: 0.86, amp: 0.12, seed: 4 }], mist: 'rgba(240,242,248,0.6)' };
+  SCENES.ninth = { outdoor: true, ground: 'snow', groundC: '#d8dce4', pano: PALE, fog: ['#d8dce8', 14, 44], hemi: ['#ffffff', '#8a90a0', 0.8], key: ['#ffffff', 0.9, -6, 10, 4], particles: 'motes', build(add) { for (let i = 0; i < 9; i++) add('pine', -14 + i * 3.6, -8 - (i % 3) * 1.4, { seed: i + 2, s: 1 + (i % 2) * 0.3, o: { leaf: '#c8d0d8' } }); add('standing', -6, -7, { seed: 4, o: { color: '#d8dce4' } }); add('standing', 7, -7.5, { seed: 6, o: { color: '#d8dce4' } }); add('house', 0, -12, { seed: 8, o: { wall: '#e0e0e4', roof: '#b8bcc8', lit: false } }); for (let i = 0; i < 6; i++) add('rock', (i % 2 ? 1 : -1) * (12 + i * 0.4), -3 + i, { seed: i + 6, o: { color: '#c8ccd4' } }); } };
+  SCENES.longhall = { outdoor: false, ground: 'planks', groundC: '#c8c0b8', walls: { tex: 'timber', c: '#e0dcd8' }, fog: ['#c8c8d0', 18, 46], hemi: ['#ffffff', '#6a6a70', 0.7], key: ['#ffffff', 0.6, 3, 9, 6], particles: 'motes', build(add) { add('hearth', 0, -9); add('throne', 0, -6.8, { s: 0.9 }); add('table', -8, -5, { o: { L: 4 } }); add('table', 8, -5, { o: { L: 4 } }); add('bench', -8, -3.6, { o: { L: 4 } }); add('bench', 8, -3.6, { o: { L: 4 } }); add('banner', -11, -8, { o: { color: '#d8dce4', c2: '#9aa0b0' } }); add('banner', 11, -8, { o: { color: '#d8dce4', c2: '#9aa0b0' } }); add('pillar', -5, -9, { o: { h: 5, color: '#c8c0b8' } }); add('pillar', 5, -9, { o: { h: 5, color: '#c8c0b8' } }); } };
+  SCENES.ballroom = Object.assign({}, SCENES.hall, { walls: { tex: 'stone', c: '#5a2a30', window: '#ff8a6a' }, hemi: ['#ffc0b0', '#2a1014', 0.55], key: ['#ffd8c8', 0.6, -3, 9, 6], tint: '#ff6a5a', particles: 'motes', build(add) { add('chandelier', -6, -5, { o: { c: '#ffb080' } }); add('chandelier', 6, -5, { o: { c: '#ffb080' } }); add('chandelier', 0, -8, { o: { c: '#ffb080' } }); add('rug', 0, -5, { o: { w: 8, L: 7, color: '#5a0a14', c2: '#c9a14a' } }); for (const s of [-1, 1]) { add('pillar', s * 11, -8.5, { o: { h: 6, color: '#8a5a50' } }); add('pillar', s * 13, -2, { o: { h: 6, color: '#8a5a50' } }); add('table', s * 10, -5, { o: { L: 2.4 } }); add('candles', s * 10, -5, { seed: s + 3 }); } add('throne', 0, -10, { s: 0.8 }); } });
+  SCENES.clockfall = { outdoor: true, ground: 'cobble', groundC: '#6a6460', pano: { sky: ['#0a0a14', '#1e1a2a', '#3a2e3a'], stars: 180, moon: [1024, 90, 44], layers: [{ type: 'roofs', c: '#18141e', base: 0.72, amp: 0.28, seed: 6, lights: 30 }], mist: 'rgba(120,100,120,0.35)' }, fog: ['#1e1a28', 16, 46], hemi: ['#b0a0c8', '#2a2420', 0.55], key: ['#e8d8ff', 0.85, -6, 10, 4], particles: 'motes', build(add) { add('clocktower', 0, -13, { seed: 1, o: { h: 12, w: 3 } }); add('clocktower', -10, -11, { seed: 2, o: { h: 8 } }); add('clocktower', 10, -11.5, { seed: 3, o: { h: 9, roof: '#5a3a2a' } }); add('gear', -6, -8.5, { seed: 2, ry: 0.3, o: { r: 1.4 } }); add('gear', 7, -8.2, { seed: 3, ry: -0.4, o: { r: 1.1, color: '#8a8a90' } }); add('lamp', -12.5, -5.5); add('lamp', 12.5, -5.5, { ry: PI }); add('crate', -13, -3, { seed: 4 }); add('gear', 13, -3, { seed: 5, ry: -1.2, o: { r: 0.8 } }); } };
+  SCENES.clockwork = { outdoor: false, ground: 'planks', groundC: '#5a4a3a', walls: { tex: 'stone', c: '#5a5048' }, fog: ['#140e0a', 14, 38], hemi: ['#e0c8a0', '#1a140e', 0.5], key: ['#ffe0b0', 0.55, 3, 9, 6], particles: 'embers', build(add) { for (let i = 0; i < 5; i++) add('gear', -12 + i * 6, -10, { seed: i + 1, ry: (i % 2 ? 0.2 : -0.2), o: { r: 1 + (i % 3) * 0.6, color: i % 2 ? '#8a8a90' : '#9a7a3a' } }); add('gear', -13, -4, { seed: 9, ry: PI / 2, o: { r: 1.2 } }); add('gear', 13, -4.5, { seed: 10, ry: -PI / 2, o: { r: 1.4, color: '#8a8a90' } }); add('candles', 0, -7.5, { seed: 3 }); add('table', 0, -7, { o: { L: 2.4, mugs: false } }); } };
+  SCENES.whitepage = { outdoor: true, ground: 'white', groundC: '#ece6d8', pano: { sky: ['#f4f0e6', '#f8f4ec', '#ffffff'], stars: 0, layers: [], mist: 'rgba(255,255,255,0.7)' }, fog: ['#f4f0e8', 16, 50], hemi: ['#ffffff', '#b0a890', 0.85], key: ['#ffffff', 0.8, -6, 10, 4], particles: 'motes', build(add) { add('bigbook', 0, -9, { o: { c: '#ffe8b0' } }); add('pages', -7, -7, { seed: 2, o: { L: 6, y: 5.4 } }); add('pages', 7, -7.5, { seed: 4, o: { L: 6, y: 5.2 } }); add('shears', 0, -12, { seed: 3 }); } };
 
   function wallTex(kind, c) {
     if (kind === 'stone') return K3.stoneTex ? K3.stoneTex() : null;

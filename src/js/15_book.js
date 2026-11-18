@@ -95,7 +95,8 @@ const Book = {
       st.meta.visited[id] = (st.meta.visited[id] || 0) + 1;
       if (sec.once && !st.run.once[id]) { st.run.once[id] = 1; Story.apply(st, sec.once, toast); }
       if (sec.enter) Story.apply(st, sec.enter, toast);
-      if (sec.ending) st.meta.endings[sec.ending] = Date.now();
+      if (sec.ending) st.meta.endings[sec.ending] = st.meta.endings[sec.ending] || Date.now();
+      if (sec.chapterEnding) st.meta.endings[sec.chapterEnding] = st.meta.endings[sec.chapterEnding] || Date.now();
     }
     st.run.section = id;
     this.sec = sec; this.secId = id;
@@ -431,7 +432,9 @@ const Book = {
         const q = Object.entries(st.run.quests);
         const act = q.filter(([, v]) => !v.done), don = q.filter(([, v]) => v.done);
         body = `${act.length ? act.map(([k, v]) => `<div class="quest ${QUESTS[k] && QUESTS[k].main ? 'main' : ''}"><b>${escapeHtml(QUESTS[k].title)}</b><em>${escapeHtml(QUESTS[k].giver)}</em><span>${escapeHtml(QUESTS[k].stages[v.stage] || QUESTS[k].stages.start)}</span></div>`).join('') : '<p class="none">No open quests. Talk to people.</p>'}
-          ${don.length ? `<h4>Completed</h4>${don.map(([k]) => `<div class="quest done"><b>${escapeHtml(QUESTS[k].title)}</b></div>`).join('')}` : ''}`;
+          ${don.length ? `<h4>Completed</h4>${don.map(([k]) => `<div class="quest done"><b>${escapeHtml(QUESTS[k].title)}</b></div>`).join('')}` : ''}
+          <h4>Endings found: ${Object.keys(st.meta.endings).filter((k) => ENDINGS[k] || CHAPTER_ENDINGS[k]).length} of ${Object.keys(ENDINGS).length + Object.keys(CHAPTER_ENDINGS).length}</h4>
+          <div class="endings">${Object.keys(CHAPTER_ENDINGS).concat(Object.keys(ENDINGS)).map((k) => st.meta.endings[k] ? `<span class="got">${escapeHtml(ENDINGS[k] || CHAPTER_ENDINGS[k])}</span>` : '<span>???</span>').join('')}</div>`;
       }
       return `<div class="sheet"><h2>Adventure Sheet</h2><div class="tabs">${tabs}</div><div class="tbody">${body}</div></div>`;
     };

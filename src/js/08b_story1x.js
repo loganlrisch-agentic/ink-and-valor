@@ -17,6 +17,8 @@ SECTIONS[94].choices.push({ t: 'Free whoever is bellowing in the cage behind the
 SECTIONS[121].once = { ally: 'brannoc' };
 
 /* Chapter I no longer ends the book: each ending turns to Chapter II */
+const CHAPTER_ENDINGS = Object.assign({}, ENDINGS);
+for (const k of Object.keys(ENDINGS)) delete ENDINGS[k];
 for (const id of [140, 141, 142, 143]) {
   const s = SECTIONS[id];
   s.chapterEnding = s.ending; delete s.ending;

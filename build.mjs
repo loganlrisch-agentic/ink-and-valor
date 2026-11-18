@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.join(ROOT, 'dist');
-const ORDER = ['00_core', '01_audio', '02_art', '03_kit3d', '04_models', '05_world', '06_data', '06b_data2', '07_hero', '08_story', '08b_story1x', '08c_story2', '08d_story3', '08e_story4', '09_chapters', '10_r3d', '11_battle', '12_bview', '13_skills', '13c_champs', '14_hud', '15_book', '16_main'];
+const ORDER = ['00_core', '01_audio', '02_art', '03_kit3d', '04_models', '05_world', '06_data', '06b_data2', '06c_data3', '07_hero', '08_story', '08b_story1x', '08c_story2', '08d_story3', '08c2_story2x', '08e_story4', '09_chapters', '10_r3d', '11_battle', '12_bview', '13_skills', '13c_champs', '14_hud', '15_book', '16_main'];
 const FONTS = [['IM Fell English', 'fell.woff2', 'normal', 'normal'], ['IM Fell English', 'fell-italic.woff2', 'normal', 'italic'], ['IM Fell English SC', 'fell-sc.woff2', 'normal', 'normal'], ['Cinzel', 'cinzel.woff2', '700', 'normal'], ['Grenze Gotisch', 'grenze.woff2', '800', 'normal']];
 const EX = ['shaders/CopyShader.js', 'shaders/LuminosityHighPassShader.js', 'postprocessing/EffectComposer.js', 'postprocessing/RenderPass.js', 'postprocessing/ShaderPass.js', 'postprocessing/UnrealBloomPass.js'];
 const THREE_DIR = path.join(ROOT, 'node_modules', 'three');

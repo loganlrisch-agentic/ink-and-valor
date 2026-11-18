@@ -1,7 +1,7 @@
 import sys, asyncio, json
 from playwright.async_api import async_playwright
 import os
-URL = os.environ.get('URL', 'file:///home/claude/inkvalor/dist/dev.html')
+URL = os.environ.get('URL', 'file:///home/claude/ink-and-valor/dist/dev.html')
 async def main(steps, W, H):
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path='/usr/bin/google-chrome', args=['--no-sandbox','--allow-file-access-from-files','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--ignore-gpu-blocklist'])
