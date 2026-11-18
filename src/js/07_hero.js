@@ -95,6 +95,7 @@ function migrateState(st) {
   st.meta.lore = st.meta.lore || {};
   if (!('trinket' in st.run.equip)) st.run.equip.trinket = null;
   st.run.rolls = st.run.rolls || {};
+  st.history = st.history || [];
   return st;
 }
 

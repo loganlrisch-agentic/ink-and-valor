@@ -195,7 +195,7 @@ const Book = {
     let choices = '';
     if (sec.death) choices = this.deathChoices();
     else if (sec.ending) choices = this.endingChoices(sec);
-    else choices = (sec.choices || []).map((c, i) => this.choiceHtml(c, i)).join('');
+    else choices = (sec.choices || []).map((c, i) => this.choiceHtml(c, i)).join('') + (sec.chapterEnding ? this.backChoices() : '');
     const folded = st.dogears.some((d) => d.sec === id);
     right.innerHTML = `
       <div class="sechead"><span class="secnum">§ ${DISPLAY[id] != null ? DISPLAY[id] : id}</span><button id="dogear" class="${folded ? 'folded' : ''}" title="Fold this page's corner (${3 - st.meta.dogearsUsed} left)"></button></div>
@@ -223,9 +223,42 @@ const Book = {
     else to = '<span class="to">turn the page</span>';
     return `<button class="choice ${c.ink ? 'ink-' + c.ink : ''} ${ok ? '' : 'locked'}" data-i="${i}" ${ok ? '' : 'aria-disabled="true"'}><span class="drop"></span><span class="t">${escapeHtml(c.t)}${ok ? '' : `<em class="req">${escapeHtml(Story.needText(c.need || c.lock))}</em>`}</span>${to}</button>`;
   },
+  backChoices() {
+    const H = this.st.history || [];
+    if (!H.length) return '';
+    const last = H[H.length - 1];
+    let h = `<button class="choice ink-gold" data-act="back" data-n="1"><span class="drop"></span><span class="t">Turn back one page and choose differently: ${escapeHtml(SECTIONS[last.sec] ? SECTIONS[last.sec].title : '')}</span><span class="to">turn to ${DISPLAY[last.sec] != null ? DISPLAY[last.sec] : last.sec}</span></button>`;
+    if (H.length > 1) h += `<button class="choice" data-act="backlist"><span class="drop"></span><span class="t">Leaf back further through the pages you have read</span><span class="to">${H.length} pages</span></button>`;
+    return h;
+  },
+  pushHistory() {
+    const st = this.st, sec = this.sec;
+    if (!sec || sec.death || sec.ending || this.secId == null) return;
+    st.history = st.history || [];
+    const H = st.history;
+    if (H.length && H[H.length - 1].sec === this.secId && JSON.stringify(H[H.length - 1].run) === JSON.stringify(st.run)) return;
+    H.push({ sec: this.secId, run: deepClone(st.run) });
+    while (H.length > 30) H.shift();
+  },
+  goBack(n) {
+    const st = this.st, H = st.history || [];
+    const k = H.length - n; if (k < 0 || !H[k]) return;
+    const e = H[k];
+    st.history = H.slice(0, k);
+    st.run = deepClone(e.run); this.lastBattle = null;
+    Sound.play('page');
+    this.go(e.sec, { silent: true });
+  },
+  backList() {
+    const H = (this.st.history || []).slice();
+    const rows = H.map((e, i) => ({ e, n: H.length - i })).reverse().map(({ e, n }) => `<button class="choice" data-n="${n}"><span class="drop"></span><span class="t">${escapeHtml(SECTIONS[e.sec] ? SECTIONS[e.sec].title : '?')} <small>(Chapter ${chapterOf(e.sec).num})</small></span><span class="to">turn to ${DISPLAY[e.sec] != null ? DISPLAY[e.sec] : e.sec}</span></button>`).join('');
+    const m = Game.modal(`<h2>Leaf Back</h2><p class="sub">The pages you have read, newest first. Turn back to any of them and choose again. Anything you have learned about the world stays with you; everything after that page is unwritten.</p><div class="choices backlist">${rows}</div>`);
+    m.querySelectorAll('[data-n]').forEach((b) => b.addEventListener('click', () => { Game.closeModal(); this.goBack(+b.dataset.n); }));
+  },
   deathChoices() {
     const st = this.st;
     let h = '';
+    h += this.backChoices();
     if (this.lastBattle) h += `<button class="choice ink-crimson" data-act="retry"><span class="drop"></span><span class="t">Take up arms again and refight the battle</span><span class="to fight">fight</span></button>`;
     st.dogears.forEach((d, i) => { h += `<button class="choice ink-gold" data-act="dogear" data-i="${i}"><span class="drop"></span><span class="t">Flip back to your folded page: ${escapeHtml(SECTIONS[d.sec].title)}</span><span class="to">turn to ${DISPLAY[d.sec]}</span></button>`; });
     const ch = chapterOf(st.run.section);
@@ -234,7 +267,7 @@ const Book = {
   },
   endingChoices() {
     const st = this.st;
-    let h = '';
+    let h = this.backChoices();
     st.dogears.forEach((d, i) => { h += `<button class="choice ink-gold" data-act="dogear" data-i="${i}"><span class="drop"></span><span class="t">Flip back to: ${escapeHtml(SECTIONS[d.sec].title)}</span><span class="to">turn to ${DISPLAY[d.sec]}</span></button>`; });
     h += `<button class="choice ink-indigo" data-act="newgame"><span class="drop"></span><span class="t">Read the whole book again, keeping your hero, and find another ending</span><span class="to">turn to 1</span></button>`;
     return h;
@@ -261,6 +294,7 @@ const Book = {
     if (!c) return;
     if (!Story.cond(st, c.need) || (c.lock && !Story.cond(st, c.lock))) { Sound.play('lock', 120); const b = document.querySelector(`.choice[data-i="${i}"]`); if (b) { b.classList.remove('nope'); void b.offsetWidth; b.classList.add('nope'); } return; }
     Sound.ensure(); Sound.play('click');
+    this.pushHistory();
     const toasts = [];
     if (c.take) { const neg = {}; for (const k in c.take) { if (k === 'gold') neg.gold = -c.take.gold; else if (k === 'potion') { neg.potion = {}; for (const p in c.take.potion) neg.potion[p] = -c.take.potion[p]; } else if (k === 'key') neg.unkey = c.take.key; else if (k === 'item') neg.unitem = c.take.item; } Story.apply(st, neg, () => {}); }
     if (c.give) Story.apply(st, c.give, (t, k) => toasts.push([t, k]));
@@ -282,14 +316,16 @@ const Book = {
     const st = this.st;
     if (a === 'shop') return this.openShop();
     if (a === 'retry') return this.retryBattle();
+    if (a === 'back') { this.goBack(+ds.n || 1); return; }
+    if (a === 'backlist') { this.backList(); return; }
     if (a === 'dogear') { const d = st.dogears[+ds.i]; if (!d) return; st.run = deepClone(d.run); this.lastBattle = null; this.go(d.sec, { silent: true }); return; }
     if (a === 'restart') {
       const ch = chapterOf(st.run.section);
-      this.lastBattle = null; st.dogears = []; st.meta.dogearsUsed = 0;
+      this.lastBattle = null; st.dogears = []; st.meta.dogearsUsed = 0; st.history = [];
       if (ch.start > 1 && st.chapterStart && st.chapterStart.sec === ch.start) { st.run = deepClone(st.chapterStart.run); this.go(ch.start, { silent: true }); return; }
       st.run = newRun(st.hero.origin); fixLoadout(st, true); this.go(1); return;
     }
-    if (a === 'newgame') { const classes = st.run.classes.slice(); st.run = newRun(st.hero.origin); st.run.classes = classes; fixLoadout(st, true); st.dogears = []; st.meta.dogearsUsed = 0; st.chapterStart = null; this.lastBattle = null; this.go(1); }
+    if (a === 'newgame') { st.history = []; const classes = st.run.classes.slice(); st.run = newRun(st.hero.origin); st.run.classes = classes; fixLoadout(st, true); st.dogears = []; st.meta.dogearsUsed = 0; st.chapterStart = null; this.lastBattle = null; this.go(1); }
     if (a === 'nextchapter') { const n = CHAPTERS[ds.ch]; if (n) this.go(n.start); }
   },
   fold() {

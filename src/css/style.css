@@ -309,3 +309,5 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #btnSheet.new { position: relative; } #btnSheet.new::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e8b830; box-shadow: 0 0 6px #ffd23a; }
 .gitem .tdesc { display: block; font-size: 12px; color: #6a4a8a; font-style: italic; }
 .loot { margin: 8px auto 4px; padding: 6px 12px; border: 1px solid rgba(232,195,90,.5); border-radius: 8px; background: rgba(40,24,10,.5); max-width: 380px; } .loot span { display: block; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .1em; color: #c9a870; text-transform: uppercase; } .loot b { font-family: 'Cinzel', serif; font-size: 16px; } .loot em { display: block; font-size: 12px; color: #e8dcc0; }
+
+.backlist { max-height: 55vh; overflow-y: auto; padding-right: 4px; } .backlist .choice small { color: var(--ink2); font-size: .8em; }
