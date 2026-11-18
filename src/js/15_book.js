@@ -63,16 +63,17 @@ const Story = {
     if (eff.potion) { const P = typeof eff.potion === 'string' ? { [eff.potion]: 1 } : eff.potion; for (const id in P) { R.potions[id] = Math.max(0, (R.potions[id] || 0) + P[id]); if (P[id] > 0) toast(`${POTIONS[id].name} ×${P[id]}`, 'potion'); } fixBelt(st); }
     if (eff.key) for (const k of arr(eff.key)) if (!R.keys.includes(k)) { R.keys.push(k); toast(`Found: ${(KEY_ITEMS[k] || { name: k }).name}`, 'key'); }
     if (eff.unkey) for (const k of arr(eff.unkey)) R.keys = R.keys.filter((x) => x !== k);
-    if (eff.item) for (const k of arr(eff.item)) if (ITEMS[k]) { giveItem(st, k); toast(`Received: ${ITEMS[k].name}`, 'item'); }
+    if (eff.item) for (const k of arr(eff.item)) if (ITEMS[k]) { giveItem(st, k); R.newStuff = true; toast(`Received: ${ITEMS[k].name}`, 'item'); }
     if (eff.unitem) for (const k of arr(eff.unitem)) { R.items = R.items.filter((x) => x !== k); for (const s in R.equip) if (R.equip[s] === k) R.equip[s] = null; }
     if (eff.flag) for (const f of arr(eff.flag)) R.flags[f] = true;
     if (eff.ink) for (const i in eff.ink) R.inks[i] = (R.inks[i] || 0) + eff.ink[i];
-    if (eff.learn && !R.classes.includes(eff.learn)) { R.classes.push(eff.learn); fixLoadout(st); toast(`You learned the ways of the ${CLASSES[eff.learn].name}!`, 'learn'); Sound.play('learn'); }
-    if (eff.gift && ITEMS[eff.gift]) { giveItem(st, eff.gift); const ok = canEquip(st, eff.gift) && equipItem(st, eff.gift); toast(`Gift: ${ITEMS[eff.gift].name}${ok ? ' (equipped)' : ''}`, 'item'); }
+    if (eff.learn && !R.classes.includes(eff.learn)) { R.classes.push(eff.learn); fixLoadout(st); R.newStuff = true; toast(`You learned the ways of the ${CLASSES[eff.learn].name}! Equip its abilities in your Adventure Sheet.`, 'learn'); Sound.play('learn'); }
+    if (eff.gift && ITEMS[eff.gift]) { giveItem(st, eff.gift); R.newStuff = true; toast(`Gift: ${ITEMS[eff.gift].name}. Equip it in your Adventure Sheet.`, 'item'); }
     if (eff.quest) for (const q in eff.quest) { const isNew = !R.quests[q]; R.quests[q] = Object.assign(R.quests[q] || {}, { stage: eff.quest[q] }); if (isNew) { toast(`New quest: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); Sound.play('quest'); } else toast(`Quest updated: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); }
     if (eff.questDone) for (const q of arr(eff.questDone)) { R.quests[q] = Object.assign(R.quests[q] || {}, { done: true }); toast(`Quest complete: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); Sound.play('quest'); }
     if (eff.xp) { const lv = gainXp(st, eff.xp); toast(`+${eff.xp} experience`, 'xp'); if (lv) toast(`Level ${st.hero.level}!`, 'learn'); }
     if (eff.ally) { R.allies = R.allies || []; for (const a of arr(eff.ally)) if (CHAMPS[a] && !R.allies.includes(a)) { R.allies.push(a); toast(`${CHAMPS[a].name} will fight beside you`, 'ally'); } }
+    if (eff.lore) { st.meta.lore = st.meta.lore || {}; for (const k of arr(eff.lore)) if (LORE[k] && !st.meta.lore[k]) { st.meta.lore[k] = Date.now(); toast(`Lore: ${LORE[k].title}`, 'lore'); } }
     if (eff.unally) R.allies = (R.allies || []).filter((a) => !arr(eff.unally).includes(a));
     if (eff.align) { R.align = (R.align || 0) + eff.align; if (eff.align > 0) toast('The ink darkens', 'dark'); else toast('Your page brightens', 'light'); }
   },
@@ -95,6 +96,7 @@ const Book = {
       st.meta.visited[id] = (st.meta.visited[id] || 0) + 1;
       if (sec.once && !st.run.once[id]) { st.run.once[id] = 1; Story.apply(st, sec.once, toast); }
       if (sec.enter) Story.apply(st, sec.enter, toast);
+      if (sec.lore) Story.apply(st, { lore: sec.lore }, toast);
       if (sec.ending) st.meta.endings[sec.ending] = st.meta.endings[sec.ending] || Date.now();
       if (sec.chapterEnding) st.meta.endings[sec.chapterEnding] = st.meta.endings[sec.chapterEnding] || Date.now();
     }
@@ -183,6 +185,7 @@ const Book = {
     const st = this.st, sec = this.sec, id = this.secId;
     Game.setMode('book');
     R3.setWorld(sec.scene === 'blank' ? 'blank' : (sec.scene || 'moor'));
+    Music.forScene(sec.scene || 'moor', sec);
     R3.setActors(this.actorsOf(sec), st);
     const right = document.getElementById('pageText');
     const paras = this.textOf(sec).map((p, i) => {
@@ -241,6 +244,7 @@ const Book = {
     const st = this.st; if (!st) return;
     const el = document.getElementById('status'); if (!el) return;
     const pts = st.hero.points ? `<span class="pts" title="Unspent stat points">${st.hero.points}</span>` : '';
+    { const nb = document.getElementById('btnSheet'); if (nb) nb.classList.toggle('new', !!(st.run.newStuff || st.hero.points)); }
     el.innerHTML = `<span class="lv">${escapeHtml(st.hero.name)} · Lv ${st.hero.level}</span><span class="gold" title="Crowns">${st.run.gold}</span><span class="luck" title="Luck">${st.run.luck}</span><span class="inks"><i class="c" title="Crimson">${st.run.inks.crimson}</i><i class="g" title="Gold">${st.run.inks.gold}</i><i class="n" title="Indigo">${st.run.inks.indigo}</i></span>`;
     const sb = document.getElementById('btnSheet'); if (sb) sb.innerHTML = 'Adventure Sheet' + pts;
     const mg = document.getElementById('margin');
@@ -283,9 +287,9 @@ const Book = {
       const ch = chapterOf(st.run.section);
       this.lastBattle = null; st.dogears = []; st.meta.dogearsUsed = 0;
       if (ch.start > 1 && st.chapterStart && st.chapterStart.sec === ch.start) { st.run = deepClone(st.chapterStart.run); this.go(ch.start, { silent: true }); return; }
-      st.run = newRun(st.hero.origin); fixLoadout(st); this.go(1); return;
+      st.run = newRun(st.hero.origin); fixLoadout(st, true); this.go(1); return;
     }
-    if (a === 'newgame') { const classes = st.run.classes.slice(); st.run = newRun(st.hero.origin); st.run.classes = classes; fixLoadout(st); st.dogears = []; st.meta.dogearsUsed = 0; st.chapterStart = null; this.lastBattle = null; this.go(1); }
+    if (a === 'newgame') { const classes = st.run.classes.slice(); st.run = newRun(st.hero.origin); st.run.classes = classes; fixLoadout(st, true); st.dogears = []; st.meta.dogearsUsed = 0; st.chapterStart = null; this.lastBattle = null; this.go(1); }
     if (a === 'nextchapter') { const n = CHAPTERS[ds.ch]; if (n) this.go(n.start); }
   },
   fold() {
@@ -339,20 +343,26 @@ const Book = {
   },
 
   /* ---------------- battle ---------------- */
-  startBattle(id, dest) {
+  startBattle(id, dest, isRetry) {
     this.dest = dest || {}; this.lastBattle = id; this.battleDone = false;
+    if (!isRetry) this.prePotions = deepClone(this.st.run.potions);
+    else if (this.prePotions) { this.st.run.potions = deepClone(this.prePotions); fixBelt(this.st); }
     Game.setMode('battle');
-    R3.setWorld(BATTLES[id].scene);
+    R3.setWorld(BATTLES[id].scene); Music.forBattle(id);
     R3.clearActors();
     BView.begin(document.getElementById('view'));
     Battle.start(id, {});
     Sound.play('shout', 300);
   },
-  retryBattle() { const id = this.lastBattle; if (!id) return; Battle.stop(); BView.end(); HUD.hide(); this.startBattle(id, this.dest); },
+  retryBattle() { const id = this.lastBattle; if (!id) return; Battle.stop(); BView.end(); HUD.hide(); this.startBattle(id, this.dest, true); },
   applyBattleRewards(b) {
     if (this.battleDone) return; this.battleDone = true;
     const st = this.st;
     gainXp(st, b.xp); st.run.gold += b.gold; st.meta.battles++; st.run.battlesWon[b.id] = 1;
+    b.loot = null;
+    const pool = LOOT_POOL.filter((id) => !st.run.items.includes(id) && (ITEMS[id].trinket || BATTLES[b.id].boss));
+    const chance = BATTLES[b.id].boss ? 1 : BATTLES[b.id].nonlethal ? 0.15 : 0.3;
+    if (pool.length && !st.run.battlesWon['loot_' + b.id] && Math.random() < chance) { const id = pool[Math.floor(Math.random() * pool.length)]; giveItem(st, id); st.run.battlesWon['loot_' + b.id] = 1; st.run.newStuff = true; b.loot = id; }
     Game.save();
   },
   battleEnded(won, b, fled) {
@@ -385,7 +395,7 @@ const Book = {
       const price = t === 'p' ? POTIONS[id].price : ITEMS[id].price;
       if (st.run.gold < price) return;
       st.run.gold -= price;
-      if (t === 'p') { st.run.potions[id] = (st.run.potions[id] || 0) + 1; fixBelt(st); } else { giveItem(st, id); if (canEquip(st, id)) equipItem(st, id); }
+      if (t === 'p') { st.run.potions[id] = (st.run.potions[id] || 0) + 1; fixBelt(st); } else { giveItem(st, id); st.run.newStuff = true; toast(`Bought ${ITEMS[id].name}. Equip it in your Adventure Sheet.`, 'item'); }
       Sound.play('coin'); Game.save(); this.refreshStatus(); R3.setActors(this.actorsOf(this.sec), st);
       m.querySelector('.mbody').innerHTML = draw(); wire();
     }));
@@ -398,7 +408,7 @@ const Book = {
     tab = tab || 'hero';
     const draw = () => {
       const S = heroStats(st), E = equippedStats(st);
-      const tabs = [['hero', 'Hero'], ['gear', 'Gear'], ['spells', 'Abilities'], ['party', 'Party'], ['satchel', 'Satchel'], ['quests', 'Quests']].map(([k, l]) => `<button class="tab ${k === tab ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('');
+      const tabs = [['hero', 'Hero'], ['gear', 'Gear'], ['spells', 'Abilities'], ['party', 'Party'], ['satchel', 'Satchel'], ['quests', 'Quests'], ['lore', 'Lore']].map(([k, l]) => `<button class="tab ${k === tab ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('');
       let body = '';
       if (tab === 'hero') {
         body = `<div class="sheet-hero"><div class="who"><h3>${escapeHtml(st.hero.name)}</h3><p>Level ${st.hero.level} ${CLASSES[st.hero.origin].name}${st.run.classes.length > 1 ? ' · also ' + st.run.classes.filter((c) => c !== st.hero.origin).map((c) => CLASSES[c].name).join(', ') : ''}</p>
@@ -407,14 +417,15 @@ const Book = {
           <div class="stats">${STAT_KEYS.map((k) => `<div class="stat"><b>${STAT_NAMES[k]}</b><span class="v">${E.s[k]}${E.s[k] !== st.hero.stats[k] ? `<small> (${st.hero.stats[k]} base)</small>` : ''}</span>${st.hero.points ? `<button class="btn sm plus" data-plus="${k}">+</button>` : ''}<em>${STAT_HELP[k]}</em></div>`).join('')}</div>
           <div class="derived"><div><b>${S.maxHp}</b><span>Health</span></div><div><b>${Math.round(S.melee)}</b><span>Weapon dmg</span></div><div><b>${Math.round(S.spellPower * S.spellMul)}</b><span>Spell power</span></div><div><b>${Math.round(S.crit * 100)}%</b><span>Crit</span></div><div><b>${S.def}</b><span>Armor</span></div><div><b>${S.luck}</b><span>Luck</span></div></div></div>`;
       } else if (tab === 'gear') {
-        body = ['weapon', 'offhand', 'head', 'body'].map((slot) => {
+        st.run.newStuff = false; document.getElementById('btnSheet').classList.remove('new');
+        body = ['weapon', 'offhand', 'head', 'body', 'trinket'].map((slot) => {
           const own = st.run.items.filter((id) => ITEMS[id] && ITEMS[id].slot === slot);
-          return `<div class="gslot"><h4>${slot === 'offhand' ? 'Off hand' : slot[0].toUpperCase() + slot.slice(1)}</h4>${own.length ? own.map((id) => { const it = ITEMS[id], on = st.run.equip[slot] === id, ok = canEquip(st, id); const r = RARITY[ITEM_RARITY[id] || 'common']; return `<div class="gitem ${on ? 'on' : ''}"><div><b style="color:${r ? r.color : 'inherit'}">${escapeHtml(it.name)}</b><span>${escapeHtml(itemLine(it))}</span>${it.req ? `<em class="${ok ? '' : 'bad'}">Requires ${reqText(it.req)}</em>` : ''}</div>${on ? (slot === 'weapon' ? '<span class="eq">Equipped</span>' : `<button class="btn sm ghost" data-unequip="${slot}">Remove</button>`) : `<button class="btn sm" data-equip="${id}" ${ok ? '' : 'disabled'}>Equip</button>`}</div>`; }).join('') : '<p class="none">Nothing yet.</p>'}</div>`;
+          return `<div class="gslot"><h4>${slot === 'offhand' ? 'Off hand' : slot === 'trinket' ? 'Trinket <small>(one quirky boost, plus a random rolled bonus)</small>' : slot[0].toUpperCase() + slot.slice(1)}</h4>${own.length ? own.map((id) => { const it = ITEMS[id], on = st.run.equip[slot] === id, ok = canEquip(st, id); const r = RARITY[ITEM_RARITY[id] || 'common']; const roll = it.trinket && st.run.rolls && st.run.rolls[id]; return `<div class="gitem ${on ? 'on' : ''}"><div><b style="color:${r ? r.color : 'inherit'}">${escapeHtml(it.name)}</b><span>${escapeHtml(itemLine(it))}${roll ? ` · rolled +${roll.v} ${STAT_NAMES[roll.stat]}` : ''}</span>${it.trinket ? `<span class="tdesc">${escapeHtml(it.desc)}</span>` : ''}${it.req ? `<em class="${ok ? '' : 'bad'}">Requires ${reqText(it.req)}</em>` : ''}</div>${on ? (slot === 'weapon' ? '<span class="eq">Equipped</span>' : `<button class="btn sm ghost" data-unequip="${slot}">Remove</button>`) : `<button class="btn sm" data-equip="${id}" ${ok ? '' : 'disabled'}>Equip</button>`}</div>`; }).join('') : '<p class="none">Nothing yet.</p>'}</div>`;
         }).join('');
       } else if (tab === 'spells') {
         const slots = (list, type) => list.map((id, i) => `<button class="lslot ${type}" data-clear="${type}:${i}" title="${id ? escapeHtml(AB[id].name + ': ' + AB[id].desc) : 'Empty'}">${id ? `<img src="${Icons.skill(id)}"><span>${AB[id].name}</span>` : `<span class="e">${type === 'active' ? i + 1 : '◇'}</span>`}</button>`).join('');
         const known = Object.keys(AB).filter((id) => st.run.classes.includes(AB[id].cls)).length;
-        const row = (id) => { const a = AB[id], s2 = abilityStatus(st, id), on = (a.type === 'active' ? st.run.actives : st.run.passives).includes(id); return `<button class="spell ${a.type} ${s2.ok ? '' : 'locked'} ${on ? 'on' : ''}" data-skill="${id}" ${s2.ok ? '' : 'disabled'}><img src="${Icons.skill(id)}"><div><b>${a.name}</b><span>${a.desc}</span><em>${a.type === 'active' ? `Spell · ${a.cd}s` : 'Passive'}${s2.meets ? '' : ' · needs ' + reqText(a.req)}</em></div></button>`; };
+        const row = (id) => { const a = AB[id], s2 = abilityStatus(st, id), on = (a.type === 'active' ? st.run.actives : st.run.passives).includes(id); return `<button class="spell ${a.type} ${a.capstone ? 'capstone' : ''} ${s2.ok ? '' : 'locked'} ${on ? 'on' : ''}" data-skill="${id}" ${s2.ok ? '' : 'disabled'}><img src="${Icons.skill(id)}"><div><b>${a.name}</b><span>${a.desc}</span><em>${a.capstone ? '<i class="cap">Capstone</i> ' : ''}${a.type === 'active' ? `Spell · ${a.cd}s` : 'Passive'}${s2.meets ? '' : ' · needs ' + reqText(a.req, a.minLevel)}</em></div></button>`; };
         const filt = this.sheetCls && st.run.classes.includes(this.sheetCls) ? this.sheetCls : st.run.classes[0];
         body = `<p class="sub">Five spells for your bar and five passives that are always on. Tap an ability to equip it; tap a slot to empty it. You know <b>${known}</b> of ${Object.keys(AB).length} abilities.</p>
           <div class="lrow"><b>Spells</b><div class="loadout">${slots(st.run.actives, 'active')}</div></div>
@@ -431,6 +442,10 @@ const Book = {
         const pots = POTION_ORDER.filter((id) => st.run.potions[id] > 0);
         body = `<h4>Potions</h4><div class="pots">${pots.length ? pots.map((id) => `<div class="pitem"><img src="${Icons.potion(id)}"><div><b>${POTIONS[id].name} ×${st.run.potions[id]}</b><span>${POTIONS[id].desc}</span></div>${st.run.belt.includes(id) ? '<span class="eq">On belt</span>' : ''}</div>`).join('') : '<p class="none">No potions.</p>'}</div>
           <h4>Keepsakes</h4><div class="keys">${st.run.keys.length ? st.run.keys.map((k) => `<div class="kitem"><b>${escapeHtml((KEY_ITEMS[k] || { name: k }).name)}</b><span>${escapeHtml((KEY_ITEMS[k] || {}).desc || '')}</span></div>`).join('') : '<p class="none">Empty pockets.</p>'}</div>`;
+      } else if (tab === 'lore') {
+        const got = st.meta.lore || {}, n = Object.keys(LORE).filter((k) => got[k]).length;
+        body = `<p class="sub">The Reader's Codex. What you learn here stays with you, even if you start the book again. <b>${n}</b> of ${Object.keys(LORE).length} entries found.</p>
+          ${LORE_CATS.map((c) => { const ks = Object.keys(LORE).filter((k) => LORE[k].cat === c); return `<h4>${c} <small>${ks.filter((k) => got[k]).length}/${ks.length}</small></h4><div class="lore">${ks.map((k) => got[k] ? `<div class="lentry"><b>${escapeHtml(LORE[k].title)}</b><p>${escapeHtml(LORE[k].text)}</p></div>` : '<div class="lentry unknown"><b>???</b><p>Not yet discovered.</p></div>').join('')}</div>`; }).join('')}`;
       } else if (tab === 'quests') {
         const q = Object.entries(st.run.quests);
         const act = q.filter(([, v]) => !v.done), don = q.filter(([, v]) => v.done);
@@ -459,7 +474,7 @@ const Book = {
   /* ---------------- title & creation ---------------- */
   showTitle() {
     Game.setMode('title');
-    R3.setWorld('moor'); R3.clearActors();
+    R3.setWorld('moor'); R3.clearActors(); Music.setTrack('theme');
     const sv = Game.peek(), has = !!sv;
     const t = document.getElementById('title');
     t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Four Chapters · The Unending Night</div>
@@ -471,13 +486,13 @@ const Book = {
       if (b.dataset.t === 'code') { Game.saveCodeModal(); return; }
       if (b.dataset.t === 'new' && has && !b.dataset.sure) { b.dataset.sure = '1'; b.innerHTML = 'Start over? This replaces your saved hero'; return; }
       t.classList.remove('on');
-      if (b.dataset.t === 'cont') { Game.load(); this.go(Game.st.run.section || 0, { silent: true }); }
+      if (b.dataset.t === 'cont') { Game.load(); if (Game.st.settings.sound === false) { Sound.setEnabled(false); Music.setEnabled(false); document.getElementById('btnSound').classList.add('off'); } this.go(Game.st.run.section || 0, { silent: true }); }
       else this.showCreate();
     }));
   },
   showCreate() {
     Game.setMode('book');
-    R3.setWorld('moor');
+    R3.setWorld('moor'); Music.setTrack('theme');
     const look = { skin: 0, hairStyle: 0, hairColor: 2 };
     let origin = 'knight', name = '';
     const preview = () => { Game.st = newState(name || 'Reader', look, origin); R3.setActors([A('hero', 0, 455, 1, 'pose'), A('tassel', 120, 400)], Game.st); };

@@ -182,6 +182,7 @@ const HUD = {
         <div class="rw"><div><b>${b.kills}</b><span>foes</span></div><div><b>+${b.xp}</b><span>experience</span></div><div><b>+${b.gold}</b><span>crowns</span></div></div>
         ${st.hero.level > lvBefore ? `<div class="lvup">Level ${st.hero.level}! You have ${st.hero.points} stat point${st.hero.points === 1 ? '' : 's'} to spend in your Adventure Sheet.</div>` : ''}
         <div class="xpbar"><i style="width:${(st.hero.xp / xpNeeded(st.hero.level)) * 100}%"></i><span>Level ${st.hero.level}: ${st.hero.xp} / ${xpNeeded(st.hero.level)}</span></div>
+        ${b.loot ? `<div class="loot"><span>Found</span><b style="color:${(RARITY[ITEM_RARITY[b.loot] || 'common'] || {}).color || '#fff'}">${escapeHtml(ITEMS[b.loot].name)}</b><em>${ITEMS[b.loot].trinket ? escapeHtml(ITEMS[b.loot].desc) : escapeHtml(itemLine(ITEMS[b.loot]))}</em></div>` : ''}
         <button class="btn" data-act="cont">Turn the page</button></div>`;
       el.querySelector('[data-act=cont]').addEventListener('click', () => Book.battleEnded(true, b));
       void out;

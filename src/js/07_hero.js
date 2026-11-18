@@ -1,17 +1,17 @@
 /* ==========================================================================
    Hero - state, derived stats, loadout, appearance
    ========================================================================== */
-const STAT_KEYS = ['might', 'wits', 'grace', 'heart'];
-const STAT_NAMES = { might: 'Might', wits: 'Wits', grace: 'Grace', heart: 'Heart' };
-const STAT_HELP = { might: 'Weapon damage for swords, axes and maces. Unlocks warrior abilities and heavy armor.', wits: 'Spell power and staff damage. Unlocks most spells.', grace: 'Critical hits, attack and move speed, bows and knives. Unlocks agile abilities.', heart: 'Health and healing. Unlocks holy, nature and protective abilities.' };
+const STAT_KEYS = ['might', 'wits', 'grace', 'heart', 'spirit', 'lore'];
+const STAT_NAMES = { might: 'Might', wits: 'Wits', grace: 'Grace', heart: 'Heart', spirit: 'Spirit', lore: 'Lore' };
+const STAT_HELP = { might: 'Weapon damage for swords, axes and maces. Unlocks warrior abilities and heavy armor.', wits: 'Spell power and staff damage. Unlocks most spells.', grace: 'Critical hits, attack and move speed, bows and knives. Unlocks agile abilities.', heart: 'Health and healing. Unlocks holy, nature and protective abilities.', spirit: 'Will, faith and the dead. Stronger shields, summons and curses, and you shrug off stuns and fear. Needed by necromancers, witches, gravewardens, paladins and monks.', lore: 'Old words and older secrets. Faster cooldowns, stronger potions, and more power to ink, song and alchemy. Needed by scriveners, alchemists, bards, wizards and witch hunters.' };
 
 const ORIGIN_KIT = {
-  knight: { stats: { might: 4, wits: 1, grace: 1, heart: 2 }, equip: { weapon: 'notched_sword', offhand: 'buckler', head: 'dented_helm', body: 'padded_gambeson' }, cape: '#7a1f1b' },
-  wizard: { stats: { might: 1, wits: 3, grace: 2, heart: 2 }, equip: { weapon: 'ashwood_staff', offhand: null, head: 'pointed_hat', body: 'ash_robe' }, cape: null },
-  rogue: { stats: { might: 2, wits: 1, grace: 3, heart: 2 }, equip: { weapon: 'twin_knives', offhand: null, head: 'shadow_hood', body: 'night_leathers' }, cape: '#1c2420' },
-  cleric: { stats: { might: 2, wits: 2, grace: 1, heart: 3 }, equip: { weapon: 'iron_mace', offhand: 'prayer_book', head: 'silver_circlet', body: 'vestments' }, cape: null },
-  ranger: { stats: { might: 1, wits: 2, grace: 3, heart: 2 }, equip: { weapon: 'hunting_bow', offhand: null, head: 'wolf_hood', body: 'ranger_leathers' }, cape: '#3a4a2a', back: { type: 'quiver' } },
-  barbarian: { stats: { might: 4, wits: 1, grace: 1, heart: 2 }, equip: { weapon: 'woodsman_axe', offhand: null, head: 'horned_cap', body: 'fur_jerkin' }, cape: null },
+  knight: { stats: { might: 4, wits: 1, grace: 1, heart: 2 , spirit: 1, lore: 1 }, equip: { weapon: 'notched_sword', offhand: 'buckler', head: 'dented_helm', body: 'padded_gambeson' }, cape: '#7a1f1b' },
+  wizard: { stats: { might: 1, wits: 3, grace: 2, heart: 2 , spirit: 1, lore: 2 }, equip: { weapon: 'ashwood_staff', offhand: null, head: 'pointed_hat', body: 'ash_robe' }, cape: null },
+  rogue: { stats: { might: 2, wits: 1, grace: 3, heart: 2 , spirit: 1, lore: 1 }, equip: { weapon: 'twin_knives', offhand: null, head: 'shadow_hood', body: 'night_leathers' }, cape: '#1c2420' },
+  cleric: { stats: { might: 2, wits: 2, grace: 1, heart: 3 , spirit: 2, lore: 1 }, equip: { weapon: 'iron_mace', offhand: 'prayer_book', head: 'silver_circlet', body: 'vestments' }, cape: null },
+  ranger: { stats: { might: 1, wits: 2, grace: 3, heart: 2 , spirit: 1, lore: 1 }, equip: { weapon: 'hunting_bow', offhand: null, head: 'wolf_hood', body: 'ranger_leathers' }, cape: '#3a4a2a', back: { type: 'quiver' } },
+  barbarian: { stats: { might: 4, wits: 1, grace: 1, heart: 2 , spirit: 1, lore: 1 }, equip: { weapon: 'woodsman_axe', offhand: null, head: 'horned_cap', body: 'fur_jerkin' }, cape: null },
 };
 
 function newRun(origin) {
@@ -19,7 +19,7 @@ function newRun(origin) {
   const run = {
     section: 0, flags: {}, inks: { crimson: 0, gold: 0, indigo: 0 }, gold: 10, luck: 8,
     potions: { heal: 2 }, belt: ['heal', null, null],
-    items: Object.values(kit.equip).filter(Boolean), equip: Object.assign({}, kit.equip),
+    items: Object.values(kit.equip).filter(Boolean), equip: Object.assign({ trinket: null }, kit.equip), rolls: {},
     keys: [], classes: [origin], actives: [null, null, null, null, null], passives: [null, null, null, null, null], quests: {}, once: {}, battlesWon: {}, allies: [], align: 0,
   };
   return run;
@@ -35,42 +35,47 @@ function newState(name, look, origin) {
     dogears: [],
     settings: { sound: true, difficulty: 'normal' },
   };
-  fixLoadout(st);
+  fixLoadout(st, true);
   return st;
 }
 
 function equippedStats(st) {
   const s = Object.assign({}, st.hero.stats);
   let def = 0, spell = 0;
-  for (const slot of ['weapon', 'offhand', 'head', 'body']) {
+  for (const slot of ['weapon', 'offhand', 'head', 'body', 'trinket']) {
     const it = ITEMS[st.run.equip[slot]];
     if (!it) continue;
-    if (it.stats) for (const k in it.stats) s[k] += it.stats[k];
+    if (it.stats) for (const k in it.stats) s[k] = (s[k] || 0) + it.stats[k];
+    const roll = it.trinket && st.run.rolls && st.run.rolls[st.run.equip[slot]];
+    if (roll) s[roll.stat] = (s[roll.stat] || 0) + roll.v;
     def += it.def || 0; spell += it.spell || 0;
   }
   return { s, def, spell };
 }
 
-function heroPassives(st) { return computeP((st.run.passives || []).filter((id) => id && abilityStatus(st, id).ok)); }
+function heroPassives(st) { const P = computeP((st.run.passives || []).filter((id) => id && abilityStatus(st, id).ok)); const tr = ITEMS[st.run.equip.trinket]; if (tr && tr.P) mergeP(P, tr.P); return P; }
 function heroStats(st) {
   const { s, def, spell } = equippedStats(st);
   const P = heroPassives(st);
   const w = ITEMS[st.run.equip.weapon] || ITEMS.notched_sword;
   const wt = Object.assign({}, WEAPON_TYPES[w.wt]);
   if (wt.kind === 'ranged') wt.range *= 1 + P.range;
+  s.spirit = s.spirit || 0; s.lore = s.lore || 0;
   const maxHp = (70 + s.heart * 12 + (st.hero.level - 1) * 7) * (1 + P.maxHp);
   let luck = st.run.luck + P.luck;
   if (st.run.keys.includes('hangmans_coin')) luck += 2;
   if (st.run.keys.includes('wrens_ribbon')) luck += 2;
   const D = def + P.def;
   return {
-    might: s.might, wits: s.wits, grace: s.grace, heart: s.heart, P,
+    might: s.might, wits: s.wits, grace: s.grace, heart: s.heart, spirit: s.spirit, lore: s.lore, P,
+    shieldMul: 1 + 0.06 * s.spirit, summonMul: 1 + 0.07 * s.spirit, dotMul: 1 + 0.05 * s.spirit, ccResist: Math.min(0.45, 0.03 * s.spirit), potionMul: 1 + 0.05 * s.lore,
+    school: { death: 1 + 0.04 * s.spirit, holy: 1 + 0.03 * s.spirit, spirit: 1 + 0.05 * s.spirit, hex: 1 + 0.04 * s.spirit, ink: 1 + 0.05 * s.lore, song: 1 + 0.05 * s.lore, fire: 1 + 0.02 * s.lore, ki: 1 + 0.03 * s.spirit },
     maxHp: Math.round(maxHp), def: D, spellPower: 9 + spell + (st.hero.level - 1) * 0.6, weapon: w, wt,
     melee: w.dmg * (1 + 0.12 * s[wt.stat]) * (1 + P.melee) * (wt.kind === 'ranged' ? 1 + P.rangedDmg : 1) * (1 + (st.hero.level - 1) * 0.03),
     spellMul: (1 + 0.12 * s.wits) * (1 + P.spell),
     crit: Math.min(0.75, 0.05 + 0.015 * s.grace + P.crit + (wt.crit || 0)), critPow: 1.8 + P.critPow,
     atkSpeed: (1 + 0.04 * s.grace) * (1 + P.atkSpd), move: 165 * (1 + 0.02 * s.grace) * (1 + P.move), heal: (1 + 0.05 * s.heart) * (1 + P.heal),
-    dmgTaken: 30 / (30 + D) * (1 - Math.min(0.6, P.dr)), luck, dodge: Math.min(0.4, P.dodge), cdr: Math.min(0.5, P.cdr),
+    dmgTaken: 30 / (30 + D) * (1 - Math.min(0.6, P.dr)), luck, dodge: Math.min(0.4, P.dodge), cdr: Math.min(0.5, P.cdr + 0.012 * s.lore),
   };
 }
 
@@ -80,18 +85,29 @@ function meetsReq(st, req) {
   for (const k in req) if ((s[k] || 0) < req[k]) return false;
   return true;
 }
-function reqText(req) { return Object.entries(req || {}).map(([k, v]) => `${STAT_NAMES[k]} ${v}`).join(', '); }
+function reqText(req, minLevel) { const p = Object.entries(req || {}).map(([k, v]) => `${STAT_NAMES[k]} ${v}`); if (minLevel > 1) p.unshift(`Level ${minLevel}`); return p.join(', '); }
+
+/* older saves: add the two new attributes and the extra point per level they missed */
+function migrateState(st) {
+  if (!st || !st.hero) return st;
+  const h = st.hero;
+  if (h.stats.spirit == null || h.stats.lore == null) { h.stats.spirit = h.stats.spirit || 1; h.stats.lore = h.stats.lore || 1; h.points = (h.points || 0) + Math.max(0, h.level - 1); }
+  st.meta.lore = st.meta.lore || {};
+  if (!('trinket' in st.run.equip)) st.run.equip.trinket = null;
+  st.run.rolls = st.run.rolls || {};
+  return st;
+}
 
 function abilityStatus(st, id) {
   const a = AB[id]; if (!a) return { ok: false, known: false, meets: false };
-  const known = st.run.classes.includes(a.cls), meets = meetsReq(st, a.req);
+  const known = st.run.classes.includes(a.cls), meets = meetsReq(st, a.req) && st.hero.level >= (a.minLevel || 1);
   return { ok: known && meets, known, meets };
 }
 function skillStatus(st, id) { const r = abilityStatus(st, id); return { learned: r.known, meets: r.meets, ok: r.ok }; }
 function knownSkills(st) { return Object.keys(AB).filter((id) => st.run.classes.includes(AB[id].cls)); }
 
-/* 5 active + 5 passive slots; keep what is valid, auto-fill empty slots */
-function fixLoadout(st) {
+/* 5 active + 5 passive slots; keep what is valid. Empty slots are only filled for a brand-new hero */
+function fixLoadout(st, fill) {
   const R = st.run;
   if (!R.actives) { R.actives = (R.loadout || []).concat([null, null, null, null, null]).slice(0, 5); }
   if (!R.passives) R.passives = [null, null, null, null, null];
@@ -99,7 +115,7 @@ function fixLoadout(st) {
   while (R.passives.length < 5) R.passives.push(null);
   for (const [L, type] of [[R.actives, 'active'], [R.passives, 'passive']]) {
     for (let i = 0; i < 5; i++) if (L[i] && (!AB[L[i]] || AB[L[i]].type !== type || !abilityStatus(st, L[i]).ok)) L[i] = null;
-    for (const id of knownSkills(st)) {
+    if (fill) for (const id of knownSkills(st)) {
       if (AB[id].type !== type || L.includes(id) || !abilityStatus(st, id).ok) continue;
       if (R.cleared && R.cleared[id]) continue;
       const e = L.indexOf(null); if (e < 0) break; L[e] = id;
@@ -123,7 +139,7 @@ function xpNeeded(level) { const k = level - 1; return 20 + k * 35 + k * k * 2; 
 function gainXp(st, n) {
   const h = st.hero; let lv = 0;
   h.xp += n;
-  while (h.xp >= xpNeeded(h.level)) { h.xp -= xpNeeded(h.level); h.level++; h.points += 2; lv++; }
+  while (h.xp >= xpNeeded(h.level)) { h.xp -= xpNeeded(h.level); h.level++; h.points += 3; lv++; }
   return lv;
 }
 
@@ -149,11 +165,15 @@ function heroCfg(st, overrideEquip) {
   if (cfg.body.type === 'bare') { cfg.bracers = '#5a3a22'; }
   if (wpn && wpn.wt === 'fists') { cfg.weapon = null; cfg.wraps = '#efe6d2'; }
   if (cfg.body.type === 'robe') cfg.legs = '#2a2430';
+  if (body && body.cape) cfg.cape = body.cape;
+  if (head && head.mask) cfg.mask = head.mask;
+  const tr = ITEMS[e.trinket]; if (tr && tr.gem) cfg.amulet = tr.gem;
+  if ([e.weapon, e.offhand, e.head, e.body, e.trinket].some((id) => id && ITEM_RARITY[id] === 'legendary')) cfg.rimColor = '#ffd27a';
   return cfg;
 }
 
 function hasItem(st, id) { return st.run.items.includes(id); }
-function giveItem(st, id) { if (!st.run.items.includes(id)) st.run.items.push(id); }
+function giveItem(st, id) { if (!st.run.items.includes(id)) st.run.items.push(id); if (ITEMS[id] && ITEMS[id].trinket) rollTrinket(st, id); }
 function equipItem(st, id) {
   const it = ITEMS[id]; if (!it) return false;
   if (!canEquip(st, id)) return false;

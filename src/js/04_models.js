@@ -932,6 +932,11 @@ const M3 = (() => {
     char.bodyKind = buildTorso(tf, cfg, char);
     if (cfg.scribble) for (const sd of [-1, 1]) { tf.decal(G.rbox(0.07, 0.95, 0.06, 0.02), cfg.scribble, 0, 0.32, 0.3 * wide, 0, 0, sd * 0.7); tf.decal(G.rbox(0.05, 0.95, 0.06, 0.02), cfg.scribble, 0, 0.32, -0.29 * wide, 0, 0, sd * 0.7); }
     if (cfg.cape) { tf.put(G.torus(0.32, PI * 2, 18), cfg.cape, 0, 0.6, -0.04, PI / 2, 0, 0, 0.3 * wide, 0.3 * wide, 0.26 * wide); tf.metal(G.sphere(10), '#d4ad48', 0.17 * wide, 0.6, 0.2, 0, 0, 0, 0.065, 0.065, 0.045); }
+    if (cfg.amulet) {
+      tf.metal(G.torus(0.018, PI * 2, 18), '#c9a14a', 0, 0.56, 0.07, PI / 2 + 0.55, 0, 0, 0.21 * wide, 0.21 * wide, 0.21 * wide);
+      tf.metal(G.cyl(1, 1, 10), '#c9a14a', 0, 0.4, 0.29 * wide + 0.02, PI / 2, 0, 0, 0.11, 0.03, 0.11);
+      tf.glow(G.octa ? G.octa() : G.sphere(8), cfg.amulet, 0, 0.4, 0.29 * wide + 0.06, 0, 0, 0, 0.085, 0.12, 0.05, 2.6);
+    }
     addBone(char, T, tb);
     if (cfg.hunch) T.rotation.x = 0.35 * cfg.hunch;
     // arms

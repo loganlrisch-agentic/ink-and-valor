@@ -150,3 +150,101 @@ Object.assign(SECTIONS, {
     ],
   },
 });
+
+/* ---------------- Chapter I side quests: the Pencil House, the Lamplighter ---------------- */
+Object.assign(QUESTS, {
+  pencil: { title: 'The Pencil House', giver: 'Ilse Penwright', stages: { start: 'The Penwright house is fading to pencil, family and all. Find a way to ink them back.', ink: 'Old Morrow keeps a pot of true ink at the mill. Or you could trust your own hand.' } },
+  lamplighter: { title: 'The Lamplighter', giver: 'Old Wendel', stages: { start: 'A ghost lights Quillsby’s lamps every night and cannot stop. Help him finish his round.' } },
+});
+SECTIONS[12].choices.splice(SECTIONS[12].choices.length - 1, 0,
+  { t: 'Knock at the grey house that looks like a sketch', to: 160, show: { notQuestDone: 'pencil' } },
+  { t: 'Follow the blue light moving from lamp to lamp', to: 165, show: { notQuestDone: 'lamplighter' } });
+Object.assign(SECTIONS, {
+  160: {
+    title: 'The Pencil House', scene: 'village', actors: [A('hero', -140, 470), A('ilse', 40, 450, -1, 'talk'), A('dot', 120, 480, -1, 'idle')],
+    once: { quest: { pencil: 'start' } },
+    text: (st) => [
+      `One house on the square is grey. Not painted grey: drawn. Its timbers are pencil lines, its thatch is cross-hatching, and through the wall you can faintly see a table and two chairs.`,
+      `A woman opens the door. She is grey too, and slightly see-through, like a drawing on thin paper held up to a window. Behind her skirts a little girl peers out. Half of the girl's face is still there. The other half is an outline, waiting to be filled in.`,
+      `"Ilse Penwright," says the woman. "And this is Dot. We were the first to fade. Our family wrote the village ledger, you see, for two hundred years. When the last page went, we went first." She tries to smile. "Dot keeps asking if it hurts. It doesn't. It's just... quiet."`,
+      st.run.flags.morrowInk ? `You have a pot of Old Morrow's true ink in your satchel.` : `T: Ink takes to pencil, Reader. If you know where to put it.`,
+    ],
+    choices: [
+      { t: 'Trace their names in ink over the pencil lines (Lore check, 9+)', check: { stat: 'lore', target: 9 }, pass: 161, fail: 162 },
+      { t: 'Ask Old Morrow at the mill for a pot of true ink', to: 163, show: { notFlag: 'morrowInk' } },
+      { t: 'Paint the house with Old Morrow’s true ink', ink: 'gold', need: { flag: 'morrowInk' }, to: 161, show: { flag: 'morrowInk' } },
+      { t: 'Promise to come back', to: 12 },
+    ],
+  },
+  161: {
+    title: 'Inked', scene: 'village', actors: [A('hero', -100, 470, 1, 'cheer'), A('ilse', 40, 450, -1, 'cheer', { alpha: 1 }), A('dot', 120, 480, -1, 'cheer', { alpha: 1 })],
+    once: { questDone: 'pencil', item: 'penwright_quill', xp: 30, luck: 1, lore: 'pencil' },
+    text: [
+      `You write their names in the doorframe, slowly, in your best hand: ILSE PENWRIGHT. DOT PENWRIGHT. Then the house. Then the table, and the two chairs, and the cat asleep on the windowsill that you hadn't noticed was there.`,
+      `The ink spreads like water into blotting paper. Color comes back into the timbers, warm brown and white. Dot's face fills in, freckle by freckle, and she touches her cheek and laughs.`,
+      `Ilse presses a long quill into your hands, as tall as a walking stick. "The family pen. Whatever it writes stays written. We won't be needing it. Not until somebody brings the last page home."`,
+    ],
+    choices: [{ t: 'Back to the square', to: 12 }],
+  },
+  162: {
+    title: 'Smudged', scene: 'village', actors: [A('hero', -100, 470, 1, 'cower'), A('ilse', 40, 450, -1, 'talk'), A('dot', 120, 480, -1, 'idle')],
+    once: { quest: { pencil: 'ink' } },
+    text: [
+      `Your hand slips. The ink blots, and runs, and where it runs, a little more of Dot goes faint. She looks down at her fading fingers and then up at you, very brave. "It's all right. You can try again."`,
+      `"Old Morrow keeps true ink at the mill," says Ilse quietly. "Ink that remembers. He might share it, if you ask nicely. Or if you ask the right way."`,
+    ],
+    choices: [{ t: 'Back to the square', to: 12 }],
+  },
+  163: {
+    title: 'True Ink', scene: 'mill', actors: [A('hero', -100, 470), A('morrow', 60, 450, -1, 'talk')],
+    once: { flag: 'morrowInk', quest: { pencil: 'ink' } },
+    text: (st) => [
+      `Old Morrow listens to you with his head on one side, like a crow. "The Penwrights. Of course. Good family. Terrible handwriting." He shuffles to a shelf and takes down a small black pot sealed with wax.`,
+      `"True ink. Ground from the bones of old stories. It remembers what things were, and it reminds them." He presses it into your hands. "Don't spill any on yourself. You'd remember everything you've ever forgotten, all at once. Most unpleasant."`,
+      st.run.flags.morrowBurned ? `He doesn't mention what you did to his mill. That somehow makes it worse.` : null,
+    ],
+    choices: [{ t: 'Hurry back to the Pencil House', to: 160 }],
+  },
+  165: {
+    title: 'The Lamplighter', scene: 'village', actors: [A('hero', -140, 470), A('wendel', 60, 440, -1, 'idle')],
+    once: { quest: { lamplighter: 'start' } },
+    text: [
+      `A blue light bobs along the edge of the square, stopping at each lamp post. When you get close you see an old man in a lamplighter's coat, raising a long pole to each lamp in turn. The lamps light. He moves on. He is see-through, and he is glowing, and he looks very, very tired.`,
+      `"Evening," he says, without stopping. "Wendel. Lamplighter. Fifty years. Died in the spring, I think. Can't stop, though. If I stop, it'll be dark. And it's always dark now. So I never stop."`,
+      `"There's one lamp I can't reach. The last one, at the churchyard gate. Things are sitting under it. If I could just light that one, I think I could finish my round. And then I think I could rest."`,
+    ],
+    choices: [
+      { t: 'Go with him to the churchyard gate', ink: 'crimson', battle: 'lamplighter', win: 166 },
+      { t: 'Tell him gently that he can stop now (Spirit check, 9+)', ink: 'gold', check: { stat: 'spirit', target: 9 }, pass: 167, fail: 168 },
+      { t: 'Leave him to his round', to: 12 },
+    ],
+  },
+  166: {
+    title: 'The Last Lamp', scene: 'churchyard', actors: [A('hero', -100, 470), A('wendel', 60, 440, -1, 'cast')],
+    once: { questDone: 'lamplighter', item: 'lamplighters_lantern', xp: 30 },
+    text: [
+      `When the ghouls are gone, Wendel raises his pole to the last lamp at the churchyard gate. It lights blue, then gold, then the warm yellow of an ordinary evening.`,
+      `"There," he says. "Round's done." He looks at his pole, and then at you, and holds out his lantern. "You'll need a light more than I will, where you're going." Then he sits down on the step under the lamp, closes his eyes, and fades, slowly and comfortably, like a man dozing off by a fire.`,
+    ],
+    choices: [{ t: 'Back to the square', to: 12 }],
+  },
+  167: {
+    title: 'Rest', scene: 'village', actors: [A('hero', -100, 470, 1, 'kneel'), A('wendel', 60, 450, -1, 'sit')],
+    once: { questDone: 'lamplighter', item: 'lamplighters_lantern', xp: 35, luck: 1 },
+    text: [
+      `You walk beside him for a while, matching his pace. Then you tell him: the lamps are lit. Every one. The town is safe. Somebody else will carry the light for a while. He has done enough.`,
+      `Wendel stops. He looks at his pole as if seeing it for the first time. "Have I?" he says. "Fifty years. I suppose I have." He sits down on the edge of the well and sets the lantern beside him, and when you look back a moment later, there is only the lantern, still burning a little blue.`,
+    ],
+    choices: [{ t: 'Take the lantern and go back to the square', to: 12 }],
+  },
+  168: {
+    title: 'Not Yet', scene: 'village', actors: [A('hero', -100, 470), A('wendel', 80, 440, -1, 'idle')],
+    text: [
+      `"Stop?" Wendel shakes his head and hurries on. "No, no. Can't stop. It'll be dark." He doesn't look back. The blue light moves away down the lane, lamp to lamp.`,
+    ],
+    choices: [
+      { t: 'Go with him to the churchyard gate', ink: 'crimson', battle: 'lamplighter', win: 166 },
+      { t: 'Back to the square', to: 12 },
+    ],
+  },
+});

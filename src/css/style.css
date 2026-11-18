@@ -300,3 +300,12 @@ button { font: inherit; color: inherit; cursor: pointer; }
 #saved.show { animation: gt 1.6s; }
 
 .endings { display: flex; flex-wrap: wrap; gap: 5px; } .endings span { font-family: 'Cinzel', serif; font-size: 11px; padding: 3px 8px; border-radius: 10px; border: 1px dashed #b09060; color: #9a8a70; } .endings span.got { border-style: solid; background: rgba(232,195,90,.3); color: var(--ink); }
+
+.spell.capstone { border-color: #9a6e10; background: linear-gradient(90deg, rgba(232,195,90,.28), rgba(255,250,235,.35)); } .spell em i.cap { font-style: normal; font-family: 'Cinzel', serif; font-weight: 700; color: #8a5a10; letter-spacing: .04em; }
+
+.lore { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; } .lentry { border: 1px solid #c0a070; border-radius: 6px; padding: 6px 9px; background: rgba(255,250,235,.4); } .lentry b { font-family: 'Cinzel', serif; font-size: 13px; } .lentry p { margin: 3px 0 0; font-size: 13px; line-height: 1.35; color: var(--ink2); } .lentry.unknown { opacity: .5; border-style: dashed; } @media (max-width: 760px) { .lore { grid-template-columns: 1fr; } }
+.t-lore { background: #4a3a6a; }
+
+#btnSheet.new { position: relative; } #btnSheet.new::after { content: ''; position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #e8b830; box-shadow: 0 0 6px #ffd23a; }
+.gitem .tdesc { display: block; font-size: 12px; color: #6a4a8a; font-style: italic; }
+.loot { margin: 8px auto 4px; padding: 6px 12px; border: 1px solid rgba(232,195,90,.5); border-radius: 8px; background: rgba(40,24,10,.5); max-width: 380px; } .loot span { display: block; font-family: 'Cinzel', serif; font-size: 11px; letter-spacing: .1em; color: #c9a870; text-transform: uppercase; } .loot b { font-family: 'Cinzel', serif; font-size: 16px; } .loot em { display: block; font-size: 12px; color: #e8dcc0; }

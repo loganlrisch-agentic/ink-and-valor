@@ -111,7 +111,7 @@ const Sound = (() => {
     try { S[name] && S[name](); } catch (e) { /* ignore */ }
   }
   return {
-    play, ensure,
+    play, ensure, output: () => master,
     setEnabled(v) { enabled = !!v; },
     get enabled() { return enabled; },
   };

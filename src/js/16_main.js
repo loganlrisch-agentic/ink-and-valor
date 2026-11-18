@@ -18,12 +18,12 @@ const Game = {
   },
   peek() { for (const k of [SAVE_KEY, SAVE_KEY + '.bak']) { try { const s = JSON.parse(localStorage.getItem(k)); if (s && s.v === 3 && s.hero && s.run) return s; } catch (e) { /* try backup */ } } return null; },
   hasSave() { return !!this.peek(); },
-  load() { const s = this.peek(); if (s) { this.st = s; return true; } return false; },
+  load() { const s = this.peek(); if (s) { this.st = migrateState(s); return true; } return false; },
   exportCode() { return 'IV1.' + btoa(unescape(encodeURIComponent(JSON.stringify(this.st || this.peek())))); },
   importCode(code) {
     const s = JSON.parse(decodeURIComponent(escape(atob(String(code).trim().replace(/^IV1\./, '').replace(/\s+/g, '')))));
     if (!s || s.v !== 3 || !s.hero || !s.run) throw new Error('not a save');
-    this.st = s; this.save(); return s;
+    this.st = migrateState(s); this.save(); return s;
   },
   saveCodeModal() {
     const has = this.st || this.peek();
@@ -38,6 +38,8 @@ const Game = {
 
   boot() {
     const app = document.getElementById('app');
+    const unlock = () => { Sound.ensure(); Music.unlock(); };
+    window.addEventListener('pointerdown', unlock, { once: false, passive: true }); window.addEventListener('keydown', unlock);
     if (!R3.init(document.getElementById('view'))) {
       app.innerHTML = '<div class="nogl"><h1>Ink &amp; Valor</h1><p>This book needs WebGL to show its pictures. Try a recent Chrome, Safari or Firefox.</p></div>';
       return;
@@ -132,7 +134,7 @@ const Game = {
     });
     document.getElementById('btnSheet').addEventListener('click', () => { if (this.st && !Battle.active) Book.openSheet(); });
     document.getElementById('btnQuests').addEventListener('click', () => { if (this.st && !Battle.active) Book.openSheet('quests'); });
-    document.getElementById('btnSound').addEventListener('click', (e) => { const on = !(this.st ? this.st.settings.sound : true); if (this.st) this.st.settings.sound = on; Sound.setEnabled(on); e.currentTarget.classList.toggle('off', !on); this.save(); });
+    document.getElementById('btnSound').addEventListener('click', (e) => { const on = !(this.st ? this.st.settings.sound : true); if (this.st) this.st.settings.sound = on; Sound.setEnabled(on); Music.setEnabled(on); e.currentTarget.classList.toggle('off', !on); this.save(); });
     document.getElementById('btnMenu').addEventListener('click', () => { if (Battle.active) return; this.save(); Book.showTitle(); });
   },
 

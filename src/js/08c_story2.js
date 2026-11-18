@@ -241,7 +241,7 @@ Object.assign(SECTIONS, {
     ],
     choices: [
       { t: 'Kneel and pour a Healing Draught on the wolf’s wound', ink: 'gold', need: { potion: 'heal' }, take: { potion: { heal: 1 } }, to: 241 },
-      { t: 'Answer him: "The trees are the story too" (Wits check, 9+)', check: { stat: 'wits', target: 9 }, pass: 241, fail: 242 },
+      { t: 'Answer him: "The trees are the story too" (Lore check, 9+)', check: { stat: 'lore', target: 9 }, pass: 241, fail: 242 },
       { t: 'Leave him to his roots', to: 205 },
     ],
   },

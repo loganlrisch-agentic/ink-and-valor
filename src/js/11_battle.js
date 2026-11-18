@@ -61,6 +61,7 @@ const Battle = {
     if (def.party) for (const id of (st.run.allies || []).slice(0, def.party)) if (!allies.some((a) => a.t === id)) allies.push({ t: id });
     allies.forEach((a, i) => { const e = makeEnt(b, 'ally', a.t, clamp(cx + (a.dx != null ? a.dx : def.hero.dx - 50 - i * 40), 40, W - 40), a.y != null ? a.y : clamp(def.hero.y + (i % 2 ? 60 : -60) * (1 + Math.floor(i / 2) * 0.6), FIELD.top, FIELD.bot)); e.facing = 1; });
     this.spawnWave(0, true);
+    for (const tr of (b.P && b.P.onStart) || []) { try { runFx(trigCtx(b, b.hero, null), tr.fx, { x: b.hero.x, y: b.hero.y, e: b.hero }); } catch (err) { console.warn(err); } }
     if (def.boss) { const boss = b.ents.find((e) => e.boss); if (boss) { boss.state = 'roar'; boss.st = 0; } }
     HUD.build(b);
     if (def.boss) HUD.bossIntro(b.ents.find((e) => e.boss));
@@ -839,6 +840,7 @@ function addStatus(b, e, name, dur, data) {
   if (e.dead) return;
   if (e.boss && (name === 'stun' || name === 'freeze' || name === 'fear' || name === 'root' || name === 'sleep')) dur *= 0.4;
   if (e.champ && (name === 'stun' || name === 'freeze' || name === 'sleep' || name === 'toad')) dur *= 0.7;
+  if (e.kind === 'hero' && b.S && b.S.ccResist && ['stun', 'freeze', 'sleep', 'toad', 'fear', 'root', 'slow', 'hexed'].includes(name)) dur *= 1 - b.S.ccResist;
   const PT = passOf(b, e);
   if (PT && PT.unstoppable) { if (name === 'slow' || name === 'root') return; if (name === 'stun' || name === 'freeze') dur *= 0.5; }
   e.status[name] = Math.max(e.status[name] || 0, dur);

@@ -42,7 +42,7 @@ Object.assign(SECTIONS, {
     ],
   },
   402: {
-    title: 'Then Let It End', scene: 'bindery',
+    title: 'Then Let It End', scene: 'bindery', once: { potion: { heal: 2, ironbark: 1 } },
     actors: (st) => { const a = [A('hero', -150, 470), A('unbinder', 120, 440, -1, 'cast'), A('vellum', 230, 380, -1, 'idle'), A('errata', 230, 500, -1, 'idle')]; (st.run.allies || []).slice(0, 3).forEach((id, i) => a.push(A(id, -250 - (i % 2) * 40, 390 + i * 50, 1, 'idle'))); return a; },
     text: (st) => {
       const n = finaleAllies(st);

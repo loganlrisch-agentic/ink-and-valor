@@ -292,7 +292,7 @@ Object.assign(SECTIONS, {
       `The water in the cloister is black and still. Somewhere below, the bell tolls, slow and muffled.`,
     ],
     choices: [
-      { t: 'Take a deep breath and dive (Heart check, 9+)', check: { stat: 'heart', target: 9 }, pass: 631, fail: { battle: 'scriptorium', win: 633 } },
+      { t: 'Dive, and call to the dead below (Spirit check, 9+)', check: { stat: 'spirit', target: 9 }, pass: 631, fail: { battle: 'scriptorium', win: 633 } },
       { t: 'Not today', to: 205 },
     ],
   },

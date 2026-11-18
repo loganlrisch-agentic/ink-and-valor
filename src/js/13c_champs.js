@@ -59,7 +59,7 @@ function champTarget(b, e, E) {
   let best = null, bs = 1e9;
   for (const o of E) {
     let s = dist(e.x, e.y, o.x, o.y);
-    if (e.kind === 'foe' && o.kind === 'hero') s *= 0.9;
+    if (e.kind === 'foe' && o.kind === 'hero') s *= b.def.spreadAggro ? 1.3 : 0.9;
     if (o.champ) s *= 0.9;
     if (o.summon) s *= 1.3;
     if (o.def && o.def.taunt) s *= 0.5;

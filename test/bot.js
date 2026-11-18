@@ -47,7 +47,8 @@
     if (visits[id] > 14) { errs.push('loop at ' + id); break; }
     const right = document.getElementById('pageText');
     const acts = [...right.querySelectorAll('.choice[data-act]')];
-    const nx = acts.find((b) => b.dataset.act === 'nextchapter') || acts.find((b) => b.dataset.act === 'retry');
+    const nx = acts.find((b) => b.dataset.act === 'nextchapter') || acts.find((b) => b.dataset.act === 'retry') || (sec.death ? (acts.find((b) => b.dataset.act === 'dogear') || acts.find((b) => b.dataset.act === 'restart')) : null);
+    if (sec.death) log.push(`  DEATH at ${id} ${sec.title}`);
     if (nx) { nx.click(); await sleep(150); continue; }
     const btns = [...right.querySelectorAll('.choice[data-i]')].filter((b) => !b.classList.contains('locked'));
     if (!btns.length) { errs.push('stuck at ' + id + ' ' + sec.title); break; }
