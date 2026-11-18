@@ -134,11 +134,14 @@ const Book = {
       putShot(oldBook, oldShot);
       const pt = oldBook.querySelector('#pageText'); if (pt) pt.scrollTop = oldScroll;
     } else {
-      const oldLeft = left.cloneNode(true), oldRight = right.cloneNode(true);
+      // page padding is a percentage of the whole book, so pin it in px on the clones
+      const padOf = (el) => getComputedStyle(el).padding;
+      const pin = (clone, src) => { clone.style.padding = padOf(src); clone.style.boxSizing = 'border-box'; return clone; };
+      const oldLeft = pin(left.cloneNode(true), left), oldRight = pin(right.cloneNode(true), right);
       const rL = rect(left), rR = rect(right);
       applyNew(); R3.warm();
       const newShot = R3.snapshot();
-      const newLeft = left.cloneNode(true);
+      const newLeft = pin(left.cloneNode(true), left);
       // the old left page stays put until the leaf lands on it
       const freeze = document.createElement('div'); freeze.className = 'freeze'; oldLeft.classList.add('face'); freeze.appendChild(oldLeft); putShot(oldLeft, oldShot);
       const shL = document.createElement('i'); shL.className = 'castL'; freeze.appendChild(shL);
@@ -459,9 +462,9 @@ const Book = {
     R3.setWorld('moor'); R3.clearActors();
     const sv = Game.peek(), has = !!sv;
     const t = document.getElementById('title');
-    t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Chapter I · The Unending Night</div>
+    t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Four Chapters · The Unending Night</div>
       <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="lnk" data-t="code">Save code</button></div>
-      <div class="cv-foot">Early demo · tap or click to fight · keys 1-4 for spells, Q W E for potions</div></div></div>`;
+      <div class="cv-foot">Tap or click to fight · keys 1-5 for spells, Q W E for potions</div></div></div>`;
     t.classList.add('on');
     t.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => {
       Sound.ensure(); Sound.play('page');
