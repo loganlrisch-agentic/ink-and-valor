@@ -1,0 +1,20 @@
+{
+  "name": "ink-and-valor",
+  "version": "0.2.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs --dev"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "three": "^0.128.0"
+  },
+  "private": true,
+  "type": "module"
+}

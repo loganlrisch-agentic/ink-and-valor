@@ -1,0 +1,12 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#111;display:flex;flex-wrap:wrap;gap:4px}canvas{width:470px;height:294px}</style></head><body>
+<script src="../src/js/00_core.js"></script><script src="../src/js/02_art.js"></script><script src="../src/js/03_rigs.js"></script><script src="../src/js/04_scenes.js"></script><script src="../src/js/05_render.js"></script>
+<script>
+const ids=Object.keys(SCENES);
+ids.forEach(id=>{const cv=document.createElement('canvas');cv.width=960;cv.height=600;document.body.appendChild(cv);
+ const r=Object.create(R);r.init(cv);r.canvas=cv;r.ctx=cv.getContext('2d');r.W=960;r.px=1;r.lightCanvas.width=480;r.lightCanvas.height=300;
+ const c=r.begin();r.drawBackground(c,id);try{SCENES[id].fx&&SCENES[id].fx(c,960,2.3);}catch(e){console.error(id,e)}
+ drawActor(c,430,450,{skin:SKINS[1],hair:{style:'spiky',color:HAIRS[2]},hat:{type:'helm'},body:{type:'armor',color:PAL.steel,color2:'#2f4f7a'},weapon:{type:'sword'},offhand:{type:'shield'},cape:'#7a1f1b'},{t:1,state:'idle',facing:1,ds:1.25});
+ r.lighting(c,id,[{x:430,y:410,r:130,c:'#f2c27a',a:0.5}],2.3);
+ c.fillStyle='#fff';c.font='20px serif';c.fillText(id,10,24);
+});
+</script></body></html>

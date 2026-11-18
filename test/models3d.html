@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#111}canvas{display:block}</style></head><body>
+<script src="../node_modules/three/build/three.min.js"></script>
+<script src="../src/js/00_core.js"></script><script src="../src/js/02_art.js"></script><script src="../src/js/03_kit3d.js"></script><script src="../src/js/04_models.js"></script><script src="../src/js/06_data.js"></script>
+<script>
+const W=1600,H=900;
+const ren=new THREE.WebGLRenderer({antialias:true});ren.setSize(W,H);ren.outputEncoding=THREE.sRGBEncoding;ren.toneMapping=THREE.ACESFilmicToneMapping;ren.toneMappingExposure=1.1;document.body.appendChild(ren.domElement);
+const sc=new THREE.Scene();sc.background=new THREE.Color('#1a2030');sc.fog=new THREE.Fog('#1a2030',30,60);
+const cam=new THREE.PerspectiveCamera(30,W/H,0.1,200);cam.position.set(0,5.2,15);cam.lookAt(0,1.1,0.6);
+sc.add(new THREE.HemisphereLight(0x9fb4d8,0x2a2018,0.65));
+const dl=new THREE.DirectionalLight(0xffe2c0,0.9);dl.position.set(5,10,8);sc.add(dl);
+const rim=new THREE.DirectionalLight(0x7fa0ff,0.5);rim.position.set(-6,4,-8);sc.add(rim);
+const gm=new THREE.Mesh(new THREE.PlaneGeometry(60,30),K3.mat('#2e3a28',{map:K3.groundTex('grass')}));gm.material.map.repeat.set(10,5);gm.rotation.x=-Math.PI/2;sc.add(gm);
+const hero={rig:'human',skin:SKINS[0],hair:{style:'spiky',color:HAIRS[2]},hat:{type:'helm',plume:'#a3241c'},body:{type:'armor',color:'#aab5c3',color2:'#2f4f7a',trim:'#c08f2a'},weapon:{type:'sword'},offhand:{type:'kite'},cape:'#7a1f1b',gauntlets:true};
+const list=[hero,CAST.amberly,CAST.nim,CAST.brannoc,CAST.vane,CAST.morrow,CAST.mayor,CAST.veyra,CAST.tallow,CAST.wren,ENEMIES.cutthroat.cfg,ENEMIES.shaman.cfg,ENEMIES.brute.cfg,ENEMIES.skeleton.cfg,ENEMIES.ghoul.cfg,CAST.grubnose,ENEMIES.sexton.cfg,ENEMIES.bandit.cfg,CAST.ferryman,{rig:'inkspawn'},{rig:'inkspawn',big:true},{rig:'rat'},{rig:'wisp'}];
+const chars=list.map((cfg,i)=>{const c=M3.build(cfg);sc.add(c.root);const row=Math.floor(i/8);const col=i%8;c.px=(col-3.5)*2.1+(row%2)*0.5;c.pz=-3+row*2.6;return c;});
+const states=['idle','attack','idle','idle','shoot','idle','talk','cast','idle','idle','attack','cast','idle','idle','idle','idle','idle','thrust','idle','idle','idle','walk','idle'];
+chars.forEach((c,i)=>M3.animate(c,{x:c.px,z:c.pz,yaw:0.35,state:states[i],p:0.35,t:1.3+i,hitAt:0.5},1));
+chars.forEach((c,i)=>M3.animate(c,{x:c.px,z:c.pz,yaw:0.35,state:states[i],p:0.35,t:1.3+i,hitAt:0.5},1));
+ren.render(sc,cam);
+</script></body></html>

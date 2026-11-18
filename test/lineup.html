@@ -1,0 +1,40 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;background:#111}canvas{display:block}</style></head><body>
+<script src="../node_modules/three/build/three.min.js"></script>
+<script src="../src/js/00_core.js"></script><script src="../src/js/02_art.js"></script><script src="../src/js/03_kit3d.js"></script><script src="../src/js/04_models.js"></script><script src="../src/js/06_data.js"></script><script src="looks.js"></script>
+<script>
+const Q = new URLSearchParams(location.search);
+const set = Q.get('set') || 'heroes', view = Q.get('view') || 'front';
+const W = +(Q.get('w') || 1600), H = +(Q.get('h') || 900);
+const ren = new THREE.WebGLRenderer({ antialias: true }); ren.setSize(W, H); ren.outputEncoding = THREE.sRGBEncoding; ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = +(Q.get("exp") || 0.95); document.body.appendChild(ren.domElement);
+const sc = new THREE.Scene();
+const bg = K3.tex('lineupbg', 16, 256, (g) => { const gr = g.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#2a3550'); gr.addColorStop(0.55, '#4a4a5c'); gr.addColorStop(1, '#2a2420'); g.fillStyle = gr; g.fillRect(0, 0, 16, 256); });
+sc.background = bg; sc.fog = new THREE.Fog('#3a3a48', 26, 60);
+const cam = new THREE.PerspectiveCamera(view === 'battle' ? 34 : 26, W / H, 0.1, 200);
+sc.add(new THREE.HemisphereLight(0xc8d4ff, 0x4a3a2c, +(Q.get("hemi")||0.5)));
+const dl = new THREE.DirectionalLight(0xfff0d8, +(Q.get("key")||0.95)); dl.position.set(-4, 9, 8); sc.add(dl);
+const fl = new THREE.DirectionalLight(0x8090c0, 0.22); fl.position.set(6, 3, 4); sc.add(fl);
+const gm = new THREE.Mesh(new THREE.PlaneGeometry(80, 40), K3.mat('#4a5a38', { map: K3.groundTex('moor') })); gm.material.map.repeat.set(12, 6); gm.rotation.x = -Math.PI / 2; sc.add(gm);
+let list = LOOKS[set] || LOOKS.heroes; if (Q.get('only')) list = Q.get('only').split(',').map((i) => list[+i]);
+const perRow = +(Q.get('row') || (list.length > 9 ? Math.ceil(list.length / 2) : list.length));
+const gap = +(Q.get('gap') || 2.15);
+const rows = Math.ceil(list.length / perRow);
+const chars = list.map((e, i) => {
+  const c = M3.build(e.cfg); sc.add(c.root);
+  const row = Math.floor(i / perRow), col = i % perRow, n = Math.min(perRow, list.length - row * perRow);
+  c.px = (col - (n - 1) / 2) * gap; c.pz = -row * 2.9 + (rows - 1) * 1.2;
+  c.state = e.state || 'pose'; c.label = e.name; return c;
+});
+const midY = 1.25;
+if (view === 'battle') { cam.position.set(0, 13, 15); cam.lookAt(0, 0.6, 0); }
+else if (view === 'close') { cam.position.set(0, 2.6, 7.2); cam.lookAt(0, 1.35, 0); }
+else { const dist = Math.max(9, perRow * gap * 1.05 + 2); cam.position.set(0, 3.2 + rows * 0.6, dist * (rows > 1 ? 1.05 : 0.95)); cam.lookAt(0, midY - (rows - 1) * 0.2, -(rows - 1) * 1.1); }
+M3.setOutlineK(+(Q.get('ol') || 0.0021));
+const yaw = +(Q.get('yaw') || 0.3);
+for (let k = 0; k < 2; k++) chars.forEach((c, i) => M3.animate(c, { x: c.px, z: c.pz, yaw, snap: true, state: c.state, p: 0.35, t: 1.0 + i * 0.37, hitAt: 0.5, blink: 1 }, 0.016));
+ren.render(sc, cam);
+// labels
+const lab = document.createElement('div'); lab.style.cssText = 'position:absolute;left:0;top:0;width:' + W + 'px;height:' + H + 'px;pointer-events:none;font:600 15px Georgia;color:#f4ead2;text-shadow:0 1px 3px #000';
+chars.forEach((c) => { const v = new THREE.Vector3(c.px, -0.15, c.pz).project(cam); const d = document.createElement('div'); d.textContent = c.label; d.style.cssText = `position:absolute;left:${(v.x * 0.5 + 0.5) * W - 80}px;top:${(-v.y * 0.5 + 0.5) * H}px;width:160px;text-align:center`; lab.appendChild(d); });
+if (Q.get('labels') !== '0') document.body.appendChild(lab);
+window.DONE = true;
+</script></body></html>
