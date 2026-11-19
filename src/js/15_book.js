@@ -522,7 +522,7 @@ const Book = {
     const sv = Game.peek(), has = !!sv;
     const t = document.getElementById('title');
     t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Four Chapters · The Unending Night</div>
-      <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="btn big arena-btn" data-t="arena">The Arena<small>Endless waves · jump straight into a fight${Arena.best() ? ` · best: wave ${Arena.best()}` : ''}</small></button><button class="lnk" data-t="code">Save code</button></div>
+      <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="btn big arena-btn" data-t="arena">The Arena<small>${Arena.best() ? `Endless waves · your best: wave ${Arena.best()}` : 'Endless waves · straight into a fight'}</small></button><button class="lnk" data-t="code">Save code</button></div>
       <div class="cv-foot">Tap or click to fight · keys 1-5 for spells, Q W E for potions</div></div></div>`;
     t.classList.add('on');
     t.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => {
