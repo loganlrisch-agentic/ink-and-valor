@@ -106,14 +106,14 @@ const BView = (() => {
       if (e.kind === 'hero' || e.dead || e.state === 'bones' || (e.boss && e.kind === 'foe')) continue;
       seen.add(e.id);
       let d = bars.get(e.id);
-      if (!d) { d = document.createElement('div'); d.className = 'ebar' + (e.kind === 'ally' ? ' ally' : '') + (e.champ ? ' champ' : ''); d.innerHTML = '<i></i><b></b>' + (e.champ ? `<em>${escapeHtml(e.name)}</em>` : ''); overlay.appendChild(d); bars.set(e.id, d); d._hp = 1; }
+      if (!d) { d = document.createElement('div'); d.className = 'ebar' + (e.kind === 'ally' ? ' ally' : '') + (e.champ ? ' champ' : '') + (e.elite ? ' elite' : ''); d.innerHTML = '<i></i><b></b>' + (e.champ || e.elite ? `<em${e.elite ? ` style="color:${ELITES[e.elite].c}"` : ''}>${escapeHtml(e.name)}</em>` : ''); overlay.appendChild(d); bars.set(e.id, d); d._hp = 1; }
       const ch = chars.get(e.id); if (!ch) continue;
       const top = topOf(e, ch);
       const p = R3.project(top.x, top.y, top.z);
       const f = clamp(e.hp / e.maxHp, 0, 1);
       d._hp = lerp(d._hp, f, 0.12);
       d.style.transform = `translate(${p.x}px, ${p.y}px) translate(-50%,-100%)`;
-      d.style.opacity = (e.alpha == null ? 1 : e.alpha) * (f < 1 || e.status.mark > 0 || e.champ ? 1 : 0.55);
+      d.style.opacity = (e.alpha == null ? 1 : e.alpha) * (f < 1 || e.status.mark > 0 || e.champ || e.elite ? 1 : 0.55);
       d.children[0].style.width = (f * 100).toFixed(1) + '%';
       d.children[1].style.width = (d._hp * 100).toFixed(1) + '%';
       d.classList.toggle('marked', e.status.mark > 0);
@@ -128,12 +128,23 @@ const BView = (() => {
 
   /* ---------- entities ---------- */
   const TINT = (e) => e.status.toad > 0 ? ['#5aff3a', 0.8] : e.status.sleep > 0 ? ['#8a9aff', 0.35] : e.buffs && e.buffs.divine > 0 ? ['#fff2b0', 0.6] : e.status.hexed > 0 ? ['#b06ad8', 0.35] : e.status.corrode > 0 ? ['#a8d84a', 0.3] : e.status.freeze > 0 ? ['#7fd8ff', 0.75] : e.status.burn > 0 ? ['#ff6a20', 0.35] : e.status.poison > 0 || e.status.rot > 0 ? ['#6ad84a', 0.35] : e.status.mark > 0 ? ['#ffcf4a', 0.25] : e.buffs && e.buffs.fury > 0 ? ['#ff4a2a', 0.3] : e.buffs && e.buffs.bulwark > 0 ? ['#a8c8ff', 0.25] : e.status.stun > 0 ? ['#fff0a0', 0.15] : null;
+  /* foes read as foes: a coloured rim light, and the unnatural ones get burning eyes */
+  const menaceC = (e) => e.elite ? ELITES[e.elite].c : e.boss ? '#ff3a1a' : e.def && e.def.undead ? '#7fd1ff' : e.def && e.def.inkborn ? '#b07aff' : e.champ ? '#ff6a4a' : '#ff5a3a';
+  function buildFoe(e) {
+    let cfg = e.cfg;
+    const unnatural = e.boss || e.elite || (e.def && (e.def.undead || e.def.inkborn));
+    if (cfg.rig === 'human' && !cfg.eyes && unnatural && !['goblin', 'child', 'kind'].includes(cfg.face)) cfg = Object.assign({}, cfg, { eyes: { color: menaceC(e), glow: true } });
+    else if (cfg.rig !== 'human' && !cfg.eyes && unnatural) cfg = Object.assign({}, cfg, { eyes: menaceC(e) });
+    const ch = M3.build(cfg);
+    for (const m of [ch.mat, ch.capeMat]) if (m && m.userData && m.userData.rim) { m.userData.rim.value.set(menaceC(e)); m.userData.rimK.value = e.boss ? 1.25 : e.elite ? 1.1 : 0.85; }
+    return ch;
+  }
   function drawEnts(b, dt) {
     const seen = new Set();
     for (const e of b.ents) {
       seen.add(e.id);
       let ch = chars.get(e.id);
-      if (!ch) { ch = M3.build(e.cfg); root.add(ch.root); chars.set(e.id, ch); ch.deadVis = 0; }
+      if (!ch) { ch = e.kind === 'foe' ? buildFoe(e) : M3.build(e.cfg); root.add(ch.root); chars.set(e.id, ch); ch.deadVis = 0; }
       const tint = TINT(e);
       let state = e.state, p = e.p || 0;
       if (state === 'bones') { state = 'dead'; }
@@ -148,7 +159,7 @@ const BView = (() => {
       const hop = e.cfg.rig === 'inkspawn' && (e.state === 'hop' || e.state === 'walk') ? (e.animT * 1.7) % 1 : 0;
       M3.animate(ch, {
         x: wx(e.x), z: wz(e.y), h: H(-(e.z || 0)) + (e.def && e.def.flying ? 0 : 0), yaw, state, p, t: e.animT, hitAt: e.hitAt,
-        scale: 1.18 * (e.status.toad > 0 ? 0.42 : 1), flash: e.flash * 0.55, tint: tint && tint[0], tintA: tint ? tint[1] : 0, alpha,
+        scale: 1.18 * (e.kind === 'foe' && !e.champ ? 1.08 : 1) * (e.status.toad > 0 ? 0.42 : 1), flash: e.flash * 0.55, tint: tint && tint[0], tintA: tint ? tint[1] : 0, alpha,
         dead: e.dead && !e.yielded ? ch.deadVis / 0.45 : (e.state === 'bones' ? 1 : 0), hop, speed: moving ? Math.hypot(e.vx || 0, e.vy || 0) : 0,
       }, dt);
       // status icons over the head
@@ -158,6 +169,8 @@ const BView = (() => {
       if (e.kind === 'hero' && b.state === 'fight') { const r = take('heroRing', () => flatDisc(ringTex(), '#ffd27a', { opacity: 0.55 })); r.position.set(wx(e.x), 0.03, wz(e.y)); r.scale.setScalar(0.75 + Math.sin(b.t * 4) * 0.04); }
       if (e.kind === 'ally' && !e.dead && !e.champ) { const r = take('allyRing', () => flatDisc(ringTex(), '#7bd389', { opacity: 0.5 })); r.position.set(wx(e.x), 0.03, wz(e.y)); r.scale.setScalar(0.7); }
       if (e.champ && !e.dead) { const r = take(e.kind === 'ally' ? 'champRingA' : 'champRingF', () => flatDisc(ringTex(), e.kind === 'ally' ? '#7bff9a' : '#ff6a5a', { opacity: 0.5 })); r.position.set(wx(e.x), 0.03, wz(e.y)); r.scale.setScalar(0.72); }
+      if (e.elite && !e.dead) { const r = take('eliteRing', () => flatDisc(discTex(), '#ffffff', { opacity: 0.42 })); r.material.color.set(ELITES[e.elite].c); r.position.set(wx(e.x), 0.04, wz(e.y)); r.scale.setScalar(((e.r || 14) / 14) * 1.15 + Math.sin(b.t * 4 + e.id) * 0.08); }
+      if (e.boss && e.kind === 'foe' && !e.dead) { const r = take('bossRing', () => flatDisc(discTex(), '#ff3a2a', { opacity: 0.32 })); r.position.set(wx(e.x), 0.04, wz(e.y)); r.scale.setScalar(((e.r || 20) / 14) * 1.25 + Math.sin(b.t * 2.5) * 0.1); }
       if (b.hero.target === e && !e.dead) { const r = take('tgtRing', () => flatDisc(ringTex(), '#ff4a3a', { opacity: 0.7 })); r.position.set(wx(e.x), 0.035, wz(e.y)); r.scale.setScalar(((e.r || 14) / 14) * 0.85 + Math.sin(b.t * 6) * 0.05); }
     }
     for (const [id, ch] of chars) if (!seen.has(id)) { M3.dispose(ch); chars.delete(id); }

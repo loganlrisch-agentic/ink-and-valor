@@ -1029,6 +1029,7 @@ const M3 = (() => {
   /* ================= creatures ================= */
   function buildCreature(cfg, char) {
     const body = char.body;
+    const eyeC = cfg.eyes ? (cfg.eyes.color || cfg.eyes) : null;
     if (cfg.rig === 'inkspawn') {
       const s = cfg.big ? 1.5 : 0.95;
       const bn = Bone('blob'), f = F(bn);
@@ -1041,7 +1042,7 @@ const M3 = (() => {
       for (let i = 0; i < 9; i++) f.put(G.cone(4), '#f2ecdc', -0.3 * s + i * 0.075 * s, 0.43 * s, 0.56 * s, PI, 0, 0, 0.032 * s, 0.11 * s, 0.03 * s, { grad: false });
       for (let i = 0; i < 6; i++) f.put(G.cone(4), '#e2dccc', -0.2 * s + i * 0.08 * s, 0.28 * s, 0.56 * s, 0, 0, 0, 0.026 * s, 0.08 * s, 0.026 * s, { grad: false });
       const n = cfg.big ? 5 : 3;
-      for (let i = 0; i < n; i++) { const a = (i - (n - 1) / 2) * 0.42; f.decal(G.sphere(10), '#04050a', Math.sin(a) * 0.48 * s, (0.66 + (i % 2) * 0.08) * s, Math.cos(a) * 0.47 * s, 0, a, 0, 0.1 * s, 0.1 * s, 0.05 * s); f.glow(G.sphere(10), '#e2ecff', Math.sin(a) * 0.5 * s, (0.66 + (i % 2) * 0.08) * s, Math.cos(a) * 0.49 * s, 0, 0, 0, 0.06 * s, 0.06 * s, 0.04 * s, 3.2); }
+      for (let i = 0; i < n; i++) { const a = (i - (n - 1) / 2) * 0.42; f.decal(G.sphere(10), '#04050a', Math.sin(a) * 0.48 * s, (0.66 + (i % 2) * 0.08) * s, Math.cos(a) * 0.47 * s, 0, a, 0, 0.1 * s, 0.1 * s, 0.05 * s); f.glow(G.sphere(10), eyeC || '#e2ecff', Math.sin(a) * 0.5 * s, (0.66 + (i % 2) * 0.08) * s, Math.cos(a) * 0.49 * s, 0, 0, 0, 0.06 * s, 0.06 * s, 0.04 * s, 3.2); }
       const g = new THREE.Group(); body.add(g); addBone(char, g, bn); char.blob = g;
       char.shadow.scale.setScalar(0.8 * s);
     } else if (cfg.rig === 'rat') {
@@ -1057,7 +1058,7 @@ const M3 = (() => {
       const hb = Bone('rhead'), hf = F(hb);
       hf.put(G.cone(14), col, 0, 0, 0.13, PI / 2, 0, 0, 0.21, 0.44, 0.21);
       hf.put(G.sphere(8), '#d27a8a', 0, 0, 0.36, 0, 0, 0, 0.05, 0.05, 0.05);
-      for (const s of [-1, 1]) { hf.put(G.sphere(12), shade(col, 0.12), s * 0.15, 0.16, -0.03, 0, 0, s * 0.3, 0.12, 0.15, 0.04); hf.decal(G.sphere(10), '#d88a96', s * 0.15, 0.16, -0.01, 0, 0, s * 0.3, 0.07, 0.09, 0.03); hf.decal(G.sphere(8), '#080406', s * 0.09, 0.08, 0.15, 0, s * 0.5, 0, 0.05, 0.05, 0.03); hf.glow(G.sphere(6), '#ff4a3a', s * 0.095, 0.085, 0.165, 0, 0, 0, 0.028, 0.028, 0.02, 3.4); }
+      for (const s of [-1, 1]) { hf.put(G.sphere(12), shade(col, 0.12), s * 0.15, 0.16, -0.03, 0, 0, s * 0.3, 0.12, 0.15, 0.04); hf.decal(G.sphere(10), '#d88a96', s * 0.15, 0.16, -0.01, 0, 0, s * 0.3, 0.07, 0.09, 0.03); hf.decal(G.sphere(8), '#080406', s * 0.09, 0.08, 0.15, 0, s * 0.5, 0, 0.05, 0.05, 0.03); hf.glow(G.sphere(6), eyeC || '#ff4a3a', s * 0.095, 0.085, 0.165, 0, 0, 0, 0.028, 0.028, 0.02, 3.4); }
       for (const s of [-1, 1]) hf.put(G.cone(4), '#f2ecdc', s * 0.03, -0.07, 0.3, PI, 0, 0, 0.02, 0.07, 0.02, { grad: false });
       for (let i = 0; i < 3; i++) hf.flat(G.cyl(1, 1, 3), '#d8d0c0', 0, -0.02, 0.28, 0, 0, PI / 2 + (i - 1) * 0.25, 0.006, 0.4, 0.006);
       addBone(char, hd, hb);
@@ -1077,7 +1078,7 @@ const M3 = (() => {
       hf.put(G.sphere(16), col, 0, 0, 0, 0, 0, 0, 0.24, 0.22, 0.26);
       hf.put(G.rbox(0.2, 0.16, 0.34, 0.07), lt, 0, -0.06, 0.24);
       hf.put(G.sphere(8), '#141010', 0, -0.02, 0.42, 0, 0, 0, 0.06, 0.05, 0.05);
-      for (const sd of [-1, 1]) { hf.put(G.cone(6), col, sd * 0.13, 0.22, -0.05, -0.2, 0, -sd * 0.3, 0.08, 0.2, 0.05); hf.glow(G.sphere(6), cfg.eyes || '#ffd23a', sd * 0.1, 0.06, 0.2, 0, 0, 0, 0.035, 0.03, 0.02, 3); }
+      for (const sd of [-1, 1]) { hf.put(G.cone(6), col, sd * 0.13, 0.22, -0.05, -0.2, 0, -sd * 0.3, 0.08, 0.2, 0.05); hf.glow(G.sphere(6), eyeC || '#ffd23a', sd * 0.1, 0.06, 0.2, 0, 0, 0, 0.035, 0.03, 0.02, 3); }
       for (let i = 0; i < 4; i++) hf.put(G.cone(4), '#f2ecdc', (i - 1.5) * 0.04, -0.16, 0.36, PI, 0, 0, 0.018, 0.06, 0.018, { grad: false });
       addBone(char, hd, hb);
       const tg = new THREE.Group(); tg.position.set(0, 0.7, -0.6); body.add(tg); const tb = Bone('wtail'); F(tb).put(G.cone(8), col, 0, 0.05, -0.25, -1.1, 0, 0, 0.12, 0.6, 0.12); addBone(char, tg, tb); char.tail = tg;
@@ -1091,7 +1092,7 @@ const M3 = (() => {
       f.put(G.sphere(16), col, 0, 0, 0, 0, 0, 0, 0.2, 0.2, 0.34);
       f.put(G.sphere(14), shade(col, 0.3), 0, 0.12, 0.26, 0, 0, 0, 0.15, 0.15, 0.15);
       f.put(G.cone(6), '#e8b030', 0, 0.1, 0.44, PI / 2, 0, 0, 0.05, 0.12, 0.05);
-      for (const sd of [-1, 1]) f.decal(G.sphere(6), '#140b06', sd * 0.08, 0.16, 0.36, 0, 0, 0, 0.03, 0.03, 0.02);
+      for (const sd of [-1, 1]) { if (eyeC) f.glow(G.sphere(6), eyeC, sd * 0.08, 0.16, 0.37, 0, 0, 0, 0.038, 0.038, 0.025, 3.4); else f.decal(G.sphere(6), '#140b06', sd * 0.08, 0.16, 0.36, 0, 0, 0, 0.03, 0.03, 0.02); }
       f.put(G.cone(6), shade(col, -0.2), 0, 0, -0.4, -PI / 2, 0, 0, 0.14, 0.3, 0.05);
       addBone(char, g, bn);
       char.wings = [];

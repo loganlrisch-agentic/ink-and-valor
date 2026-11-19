@@ -144,8 +144,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .ebar i, .ebar b { position: absolute; left: 0; top: 0; bottom: 0; }
 .ebar b { background: #f0d080; z-index: 0; } .ebar i { background: linear-gradient(180deg, #ff6a4a, #b8201a); z-index: 1; }
 .ebar.ally i { background: linear-gradient(180deg, #9dffb0, #3a9a4a); }
-.ebar.champ { width: 64px; height: 8px; overflow: visible; }
-.ebar.champ em { position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); white-space: nowrap; font-family: 'Cinzel', serif; font-style: normal; font-weight: 700; font-size: 11px; color: #ffd8c8; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
+.ebar.champ, .ebar.elite { width: 64px; height: 8px; overflow: visible; }
+.ebar.champ em, .ebar.elite em { position: absolute; left: 50%; bottom: 9px; transform: translateX(-50%); white-space: nowrap; font-family: 'Cinzel', serif; font-style: normal; font-weight: 700; font-size: 11px; color: #ffd8c8; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 .ebar.champ.ally em { color: #c8ffd8; }
 .ebar.marked { box-shadow: 0 0 0 2px #ffd27a, 0 0 8px #ffd27a; }
 

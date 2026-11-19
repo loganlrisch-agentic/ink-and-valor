@@ -8,9 +8,42 @@ const isAtk = (s) => s === 'attack' || s === 'thrust' || s === 'cast' || s === '
 const isDisabled = (e) => e.status.stun > 0 || e.status.freeze > 0 || e.status.sleep > 0 || e.status.toad > 0;
 
 let _eid = 1;
+/* elite foes: a rolled affix that changes how a monster fights, and how it looks */
+const ELITES = {
+  hulking: { name: 'Hulking', c: '#ff8a3a', hp: 1.9, dmg: 1.35, scale: 1.28, tip: 'huge and hits like a cart' },
+  frenzied: { name: 'Frenzied', c: '#ff2a5a', hp: 1.3, cd: 0.58, speed: 1.4, tip: 'fast and furious' },
+  inkbound: { name: 'Inkbound', c: '#a06aff', hp: 1.25, shield: 0.6, tip: 'wrapped in an ink shield' },
+  vampiric: { name: 'Vampiric', c: '#d8143a', hp: 1.45, leech: 0.4, tip: 'heals as it hits' },
+  blotted: { name: 'Blotted', c: '#3a7aff', hp: 1.4, splits: 'inkspawn', tip: 'bursts into inkspawn' },
+};
+function makeElite(b, e, kind) {
+  const E = ELITES[kind]; if (!E) return;
+  e.elite = kind; e.name = `${E.name} ${e.name}`;
+  e.hp = e.maxHp = Math.round(e.maxHp * E.hp);
+  if (E.dmg) e.dmgMul *= E.dmg;
+  if (E.speed) e.speed *= E.speed;
+  e.def = Object.assign({}, e.def, { xp: Math.round((e.def.xp || 0) * 2.2), gold: [(e.def.gold || [0, 0])[0] * 2 + 2, (e.def.gold || [0, 0])[1] * 2 + 4] });
+  if (E.cd) e.def.cd = (e.def.cd || 1.2) * E.cd;
+  if (E.splits && !e.def.splits) e.def.splits = E.splits;
+  if (E.scale) { e.cfg = Object.assign({}, e.cfg, { scale: (e.cfg.scale || 1) * E.scale }); e.r = Math.round(e.r * E.scale); }
+  if (E.shield) e.shield = Math.round(e.maxHp * E.shield);
+  if (E.leech) e.eliteLeech = E.leech;
+}
+function rollElite(b, e) {
+  const st = Game.st, def = b.def;
+  if (!st || def.tutorial || def.nonlethal || e.champ || e.boss || e.summon || (e.def && e.def.ally)) return;
+  const lvl = st.hero.level;
+  if (lvl < 3) return;
+  const chance = Math.min(0.34, 0.05 + lvl * 0.02) * (st.settings.difficulty === 'story' ? 0.4 : 1);
+  if (Math.random() >= chance) return;
+  const pool = Object.keys(ELITES).filter((k) => !(k === 'blotted' && e.def && e.def.splits));
+  makeElite(b, e, pool[Math.floor(Math.random() * pool.length)]);
+}
 function makeEnt(b, kind, type, x, y, forceChamp) {
   const st = Game.st;
-  const diff = st.settings.difficulty === 'story' ? { hp: 0.85, dmg: 0.6 } : { hp: 1, dmg: 1 };
+  const bt = (b.def && b.def.tier) || 1;
+  // Normal is meant to bite: early chapters get the biggest bump, later ones already scale by tier
+  const diff = st.settings.difficulty === 'story' ? { hp: 0.85, dmg: 0.6 } : bt <= 1.2 ? { hp: 1.55, dmg: 1.5 } : bt <= 2.2 ? { hp: 1.42, dmg: 1.38 } : { hp: 1.22, dmg: 1.18 };
   let e;
   if (kind === 'hero') {
     const S = b.S;
@@ -22,8 +55,10 @@ function makeEnt(b, kind, type, x, y, forceChamp) {
     const d = ENEMIES[type];
     const ally = kind === 'ally';
     const tier = ally ? 1 + Math.max(0, (st.hero.level - 1)) * 0.08 : (b.def.tier || 1);
-    const hpMul = (ally ? 1 : diff.hp * (b.crowd || 1)) * tier;
-    e = { kind, type, def: d, cfg: d.cfg, hp: Math.round(d.hp * hpMul), maxHp: Math.round(d.hp * hpMul), r: d.r, speed: d.speed, dmgMul: (ally ? 1 : diff.dmg) * (1 + (tier - 1) * 0.6), name: d.name, boss: !!d.boss && !ally, tier };
+    // bosses are tuned by hand already: they get a gentler bump so a solo hero can still win
+    const dv = d.boss && st.settings.difficulty !== 'story' ? { hp: Math.min(diff.hp, 1.15), dmg: Math.min(diff.dmg, 1.1) } : diff;
+    const hpMul = (ally ? 1 : dv.hp * (b.crowd || 1)) * tier;
+    e = { kind, type, def: d, cfg: d.cfg, hp: Math.round(d.hp * hpMul), maxHp: Math.round(d.hp * hpMul), r: d.r, speed: d.speed, dmgMul: (ally ? 1 : dv.dmg) * (1 + (tier - 1) * 0.6), name: d.name, boss: !!d.boss && !ally, tier };
   }
   Object.assign(e, {
     id: _eid++, x, y, z: 0, vx: 0, vy: 0, kx: 0, ky: 0, facing: kind === 'hero' ? 1 : -1, state: 'idle', st: 0, p: 0,
@@ -78,6 +113,7 @@ const Battle = {
       if (sp.edge) x = sp.edge < 0 ? -50 - Math.random() * 40 : W + 50 + Math.random() * 40;
       else x = clamp(b.cx + sp.dx, 40, W - 40);
       const e = makeEnt(b, 'foe', sp.t, x, y, sp.champ);
+      rollElite(b, e);
       e.facing = x > b.hero.x ? -1 : 1;
       if (sp.edge) e.entering = true;
       else if (!initial) { e.state = 'rise'; e.st = 0; e.alpha = 0; burst(b, x, y - 10, 'ink', 14); }
@@ -170,6 +206,7 @@ const Battle = {
       if (e.state === 'bones') { if (e.st > 3) { e.state = 'rise'; e.st = 0; e.hp = Math.round(e.maxHp * 0.5); Sound.play('bone'); } continue; }
       if (e.state === 'rise') { e.alpha = clamp(e.st / 0.6, 0, 1); if (e.st > 0.7) { e.state = 'idle'; e.st = 0; e.alpha = 1; } continue; }
       if (e.shieldT > 0) { e.shieldT -= dt; if (e.shieldT <= 0) e.shield = 0; }
+      if (e.kind === 'foe' && (e.elite || e.boss)) { e.fxT = (e.fxT || 0) - dt; if (e.fxT <= 0) { e.fxT = e.boss ? 0.09 : 0.2; burst(b, e.x + rand(-14, 14) * (e.boss ? 2 : 1), e.y - rand(6, 40), 'ember', 1, { c: e.elite ? ELITES[e.elite].c : (e.def && e.def.undead ? '#7fd1ff' : e.def && e.def.inkborn ? '#a06aff' : '#ff4a2a') }); } }
       if (e.stacks) for (const k in e.stacks) { const sk = e.stacks[k]; sk.t -= dt; if (sk.t <= 0) delete e.stacks[k]; }
       if (e.life != null) { e.life -= dt; if (e.life <= 0) { killEnt(b, e, null, true); continue; } }
       if (e.kind === 'hero') heroThink(b, e, dt);
@@ -770,6 +807,7 @@ function dealDamage(b, src, tgt, amount, o) {
   if (src && src.kind === 'hero') b.dmgDealt = (b.dmgDealt || 0) + dmg;
   if (src && !src.dead && src.buffs && src.buffs.bloodrage > 0 && !o.dot) healEnt(b, src, dmg * 0.2, false);
   if (src && PS && PS.leech && !o.dot) healEnt(b, src, dmg * PS.leech, false);
+  if (src && src.eliteLeech && !o.dot && dmg > 0) healEnt(b, src, dmg * src.eliteLeech, false);
   // triggers
   if (PS && !o.dot && !o.noTrigger) {
     if (o.auto) for (const tr of PS.onHit) { if (!tr.auto) continue; if (tr.every) { src.hitN = (src.hitN || 0) + 1; if (src.hitN % tr.every) continue; } else if (Math.random() >= (tr.c == null ? 1 : tr.c)) continue; runFx(trigCtx(b, src, tgt), tr.fx, { x: tgt.x, y: tgt.y, e: tgt }); }

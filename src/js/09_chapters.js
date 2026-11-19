@@ -8,7 +8,7 @@ const CHAPTERS = {
   III: { num: 'III', title: 'The Library of Teeth', start: 300, teaser: 'The Folio: a city of paper towers, red soldiers and a Library with a mouth. The man with the shears is very close now.' },
   IV: { num: 'IV', title: 'The Last Page', start: 400, teaser: 'Behind the black door is the Bindery, and in the Bindery is the man who cut the endings out of the world.' },
 };
-const CHAPTER_RANGES = [[0, 199, 'I'], [200, 299, 'II'], [600, 699, 'II'], [300, 399, 'III'], [700, 799, 'III'], [400, 599, 'IV'], [800, 899, 'IV']];
+const CHAPTER_RANGES = [[0, 199, 'I'], [1000, 1199, 'I'], [200, 299, 'II'], [600, 699, 'II'], [1200, 1399, 'II'], [300, 399, 'III'], [700, 799, 'III'], [1400, 1599, 'III'], [400, 599, 'IV'], [800, 899, 'IV'], [1600, 1999, 'IV']];
 function chapterOf(id) { id = +id || 0; for (const [lo, hi, k] of CHAPTER_RANGES) if (id >= lo && id <= hi) return CHAPTERS[k]; return CHAPTERS.I; }
 
 /* gamebook-style shuffled section numbers; each chapter gets its own block of numbers */
