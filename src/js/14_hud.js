@@ -174,6 +174,7 @@ const HUD = {
   },
   results(b, won) {
     const el = this.el('hResults'); if (!el) return;
+    if (Arena.on) { Arena.results(b, won, el); return; }
     const st = Game.st;
     if (won) {
       const lvBefore = st.hero.level;

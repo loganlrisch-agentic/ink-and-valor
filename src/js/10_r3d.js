@@ -137,7 +137,7 @@ const R3 = {
     return { pos: new THREE.Vector3(0, wide ? 3.7 : 4.4, wide ? 15.2 : 18), look: new THREE.Vector3(0, 1.0, -0.6), fov: wide ? 30 : 34 };
   },
   battleCam(aspect) {
-    const fov = 34, halfW = 9.3, t = Math.tan((fov * Math.PI / 180) / 2) * Math.max(0.9, aspect);
+    const fov = 34, halfW = aspect < 0.9 ? 8.8 : 9.3, t = Math.tan((fov * Math.PI / 180) / 2) * Math.max(0.5, aspect);
     const d = Math.max(13, halfW / t);
     const pitch = 0.74;
     return { pos: new THREE.Vector3(0, Math.sin(pitch) * d + 0.6, Math.cos(pitch) * d + 0.4), look: new THREE.Vector3(0, 0.6, -0.4), fov };

@@ -23,13 +23,9 @@ const SECTIONS = {
   0: {
     title: 'Before You Begin', scene: 'blank', actors: [],
     text: [
-      `You are holding the Hundred-Path Tome. Try not to drop it. The last reader who dropped it is somewhere around page ninety, and he is not enjoying himself.`,
-      `T: Rules, then. I'm Tassel, the ribbon. I mark places. Mostly the places where readers died.`,
-      `Every page ends in choices. Pick one and turn to the page it names. Some choices need things: gold, an item, a steady hand. Those stay in faded ink until you have them.`,
-      `Choices are written in three inks. Crimson is bold, gold is kind, indigo is sly. The book remembers which you favor, and so do the people in it.`,
-      `When the ink stirs, you fight. Tap or click to move and attack. Your spells wait on the bar along the bottom of the page, numbered 1 to 4; your potions hang on your belt beside them.`,
-      `Fold the corner of a page to hold your place. You get three folds a chapter. When you reach THE END, and you will, you can flip back to a folded page and keep everything your hero has learned.`,
-      `T: Ready? Of course you're not. Nobody ever is. Turn the page.`,
+      `You are holding the Hundred-Path Tome. Try not to drop it.`,
+      `T: I'm Tassel, the ribbon. Quick rules. Every page ends in choices: crimson is bold, gold is kind, indigo is sly. When the ink stirs, you fight. Tap to move and attack, and your spells sit on the bar at the bottom.`,
+      `T: That's all you need. The rest you'll learn the hard way, like everyone. Turn the page.`,
     ],
     choices: [{ t: 'Begin Chapter I: The Unending Night', to: 1 }],
   },

@@ -85,6 +85,7 @@ const Book = {
 
   /* ---------------- navigation ---------------- */
   go(id, opt) {
+    Track.event('page', { id });
     opt = opt || {};
     const st = this.st;
     let sec = SECTIONS[id];
@@ -407,6 +408,8 @@ const Book = {
     Game.save();
   },
   battleEnded(won, b, fled) {
+    if (Arena.on) { if (fled) Arena.exit(); return; }
+    Track.event('battle', { id: b.id, won: !!won, fled: !!fled, lvl: this.st.hero.level });
     Battle.stop(); BView.end(); HUD.hide(); HUD.hurtT = 0; R3.setFx({ uHurt: 0, uGrey: 0, uFlash: 0 }); R3.shake = 0; R3.zoom = 0;
     const d = this.dest || {};
     if (fled) { this.render([], {}); return; }
@@ -519,12 +522,13 @@ const Book = {
     const sv = Game.peek(), has = !!sv;
     const t = document.getElementById('title');
     t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Four Chapters · The Unending Night</div>
-      <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="lnk" data-t="code">Save code</button></div>
+      <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="btn big arena-btn" data-t="arena">The Arena<small>Endless waves · jump straight into a fight${Arena.best() ? ` · best: wave ${Arena.best()}` : ''}</small></button><button class="lnk" data-t="code">Save code</button></div>
       <div class="cv-foot">Tap or click to fight · keys 1-5 for spells, Q W E for potions</div></div></div>`;
     t.classList.add('on');
     t.querySelectorAll('[data-t]').forEach((b) => b.addEventListener('click', () => {
       Sound.ensure(); Sound.play('page');
       if (b.dataset.t === 'code') { Game.saveCodeModal(); return; }
+      if (b.dataset.t === 'arena') { Arena.open(); return; }
       if (b.dataset.t === 'new' && has && !b.dataset.sure) { b.dataset.sure = '1'; b.innerHTML = 'Start over? This replaces your saved hero'; return; }
       t.classList.remove('on');
       if (b.dataset.t === 'cont') { Game.load(); if (Game.st.settings.sound === false) { Sound.setEnabled(false); Music.setEnabled(false); document.getElementById('btnSound').classList.add('off'); } this.go(Game.st.run.section || 0, { silent: true }); }

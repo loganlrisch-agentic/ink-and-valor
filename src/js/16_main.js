@@ -6,7 +6,7 @@ const Game = {
   st: null, mode: 'title', rect: null, rectTo: null, last: 0,
   /* progress autosaves to this browser after every page, battle, purchase and level-up */
   save() {
-    if (!this.st) return;
+    if (!this.st || Arena.on) return;
     try {
       this.st.meta.savedAt = Date.now();
       const prev = localStorage.getItem(SAVE_KEY);
