@@ -187,7 +187,7 @@ const HUD = {
       el.querySelector('[data-act=cont]').addEventListener('click', () => Book.battleEnded(true, b));
       void out;
     } else {
-      el.innerHTML = `<div class="card lose"><h2>You Have Fallen</h2><p>The ink closes over you. Somewhere, a ribbon sighs.</p>
+      el.innerHTML = `<div class="card lose"><h2>You Have Fallen</h2><p>The ink closes over you. Somewhere, a ribbon sighs.</p><p class="tip">Tassel will slip you healing draughts for the rematch.</p>
         <button class="btn" data-act="retry">Fight again</button><button class="btn ghost" data-act="end">Turn to the end</button></div>`;
       el.querySelector('[data-act=retry]').addEventListener('click', () => Book.retryBattle());
       el.querySelector('[data-act=end]').addEventListener('click', () => Book.battleEnded(false, b));

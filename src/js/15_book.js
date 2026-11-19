@@ -47,7 +47,7 @@ const Story = {
     if (c.key) out.push((Array.isArray(c.key) ? c.key : [c.key]).map((k) => (KEY_ITEMS[k] || { name: k }).name).join(' and '));
     if (c.item) out.push((Array.isArray(c.item) ? c.item : [c.item]).map((k) => (ITEMS[k] || { name: k }).name).join(' and '));
     if (c.cls) out.push(`the ways of the ${CLASSES[c.cls].name}`);
-    if (c.ally) out.push((Array.isArray(c.ally) ? c.ally : [c.ally]).map((a) => CHAMPS[a] ? CHAMPS[a].name : a).join(' and ') + ' at your side');
+    if (c.ally) out.push((Array.isArray(c.ally) ? c.ally : [c.ally]).map((a) => CHAMPS[a] ? CHAMPS[a].name : a).join(' and ') + ' sworn to you');
     if (c.level) out.push(`level ${c.level}`);
     if (c.alignMin) out.push('a darker story behind you');
     if (c.keyCount) out.push(`${c.keyCount[1]} ${c.keyCount[2] || 'pieces'}`);
@@ -72,7 +72,7 @@ const Story = {
     if (eff.quest) for (const q in eff.quest) { const isNew = !R.quests[q]; R.quests[q] = Object.assign(R.quests[q] || {}, { stage: eff.quest[q] }); if (isNew) { toast(`New quest: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); Sound.play('quest'); } else toast(`Quest updated: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); }
     if (eff.questDone) for (const q of arr(eff.questDone)) { R.quests[q] = Object.assign(R.quests[q] || {}, { done: true }); toast(`Quest complete: ${QUESTS[q] ? QUESTS[q].title : q}`, 'quest'); Sound.play('quest'); }
     if (eff.xp) { const lv = gainXp(st, eff.xp); toast(`+${eff.xp} experience`, 'xp'); if (lv) toast(`Level ${st.hero.level}!`, 'learn'); }
-    if (eff.ally) { R.allies = R.allies || []; for (const a of arr(eff.ally)) if (CHAMPS[a] && !R.allies.includes(a)) { R.allies.push(a); toast(`${CHAMPS[a].name} will fight beside you`, 'ally'); } }
+    if (eff.ally) { R.allies = R.allies || []; for (const a of arr(eff.ally)) if (CHAMPS[a] && !R.allies.includes(a)) { R.allies.push(a); toast(`${CHAMPS[a].name} swears to stand with you at the end`, 'ally'); } }
     if (eff.lore) { st.meta.lore = st.meta.lore || {}; for (const k of arr(eff.lore)) if (LORE[k] && !st.meta.lore[k]) { st.meta.lore[k] = Date.now(); toast(`Lore: ${LORE[k].title}`, 'lore'); } }
     if (eff.unally) R.allies = (R.allies || []).filter((a) => !arr(eff.unally).includes(a));
     if (eff.align) { R.align = (R.align || 0) + eff.align; if (eff.align > 0) toast('The ink darkens', 'dark'); else toast('Your page brightens', 'light'); }
@@ -382,7 +382,12 @@ const Book = {
   startBattle(id, dest, isRetry) {
     this.dest = dest || {}; this.lastBattle = id; this.battleDone = false;
     if (!isRetry) this.prePotions = deepClone(this.st.run.potions);
-    else if (this.prePotions) { this.st.run.potions = deepClone(this.prePotions); fixBelt(this.st); }
+    else if (this.prePotions) {
+      this.st.run.potions = deepClone(this.prePotions);
+      // you fight alone now, so a lost fight never leaves you stranded: Tassel tops up your healing draughts for the rematch
+      if ((this.st.run.potions.heal || 0) < 2) this.st.run.potions.heal = 2;
+      fixBelt(this.st);
+    }
     Game.setMode('battle');
     R3.setWorld(BATTLES[id].scene); Music.forBattle(id);
     R3.clearActors();
@@ -472,8 +477,8 @@ const Book = {
           <p class="sub">${Object.keys(CLASSES).length - st.run.classes.length} callings remain unknown. Their masters are somewhere in the story.</p>`;
       } else if (tab === 'party') {
         const al = st.run.allies || [];
-        body = `<p class="sub">Companions fight beside you in the battles that matter. The first three in this list come with you; tap one to bring them to the front.</p>
-          ${al.length ? `<div class="party">${al.map((id, i) => { const c = CHAMPS[id]; return `<button class="pmember ${i < 3 ? 'on' : ''}" data-front="${id}"><img src="${Icons.cls(c.cls)}"><div><b>${escapeHtml(c.name)}</b><span>${CLASSES[c.cls].name} · ${c.role}</span><em>${c.abil.map((a) => AB[a].name).join(', ')}</em></div>${i < 3 ? '<span class="eq">In your party</span>' : ''}</button>`; }).join('')}</div>` : '<p class="none">Nobody has sworn to stand with you yet. Help people, and some of them will remember.</p>'}`;
+        body = `<p class="sub">You walk this book alone. But everyone who swears to you here will come running for the final battle, every last one of them.</p>
+          ${al.length ? `<div class="party">${al.map((id, i) => { const c = CHAMPS[id]; return `<button class="pmember on" data-front="${id}"><img src="${Icons.cls(c.cls)}"><div><b>${escapeHtml(c.name)}</b><span>${CLASSES[c.cls].name} · ${c.role}</span><em>${c.abil.map((a) => AB[a].name).join(', ')}</em></div><span class="eq">At the last page</span></button>`; }).join('')}</div>` : '<p class="none">Nobody has sworn to stand with you yet. Help people, and some of them will remember.</p>'}`;
       } else if (tab === 'satchel') {
         const pots = POTION_ORDER.filter((id) => st.run.potions[id] > 0);
         body = `<h4>Potions</h4><div class="pots">${pots.length ? pots.map((id) => `<div class="pitem"><img src="${Icons.potion(id)}"><div><b>${POTIONS[id].name} ×${st.run.potions[id]}</b><span>${POTIONS[id].desc}</span></div>${st.run.belt.includes(id) ? '<span class="eq">On belt</span>' : ''}</div>`).join('') : '<p class="none">No potions.</p>'}</div>

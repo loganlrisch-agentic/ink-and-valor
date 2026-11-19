@@ -8,7 +8,7 @@
     st.hero.stats[main] += (P.lvl - 1); st.hero.stats.heart += (P.lvl - 1);
     st.run.classes = Array.from(new Set([P.origin].concat(P.classes || [])));
     st.run.allies = (P.allies || []).slice();
-    st.run.potions.heal = 4;
+    st.run.potions.heal = P.pots != null ? P.pots : 4;
     if (P.items) for (const it of P.items) { giveItem(st, it); equipItem(st, it); }
     st.run.actives = (P.actives || CLASS_ABILS[P.origin].filter((id) => AB[id].type === 'active')).concat([null, null, null, null, null]).slice(0, 5);
     st.run.passives = (P.passives || CLASS_ABILS[P.origin].filter((id) => AB[id].type === 'passive')).concat([null, null, null, null, null]).slice(0, 5);

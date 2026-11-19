@@ -11,7 +11,7 @@ Object.assign(ENDINGS, {
 });
 BATTLES.finale_hero_b = Object.assign({}, BATTLES.finale_hero, { title: 'The Last Page', waves: [[{ t: 'unbinder', dx: 180, y: 450 }, { t: 'vellum', dx: 300, y: 380 }, { t: 'gloam', dx: 300, y: 510 }]], allies: [{ t: 'errata', dx: -120, y: 380 }] });
 
-const finaleAllies = (st) => (st.run.allies || []).slice(0, 3).map((id) => CHAMPS[id] ? CHAMPS[id].name : id);
+const finaleAllies = (st) => (st.run.allies || []).map((id) => CHAMPS[id] ? CHAMPS[id].name : id);
 
 Object.assign(SECTIONS, {
   400: {
@@ -43,7 +43,7 @@ Object.assign(SECTIONS, {
   },
   402: {
     title: 'Then Let It End', scene: 'bindery', once: { potion: { heal: 2, ironbark: 1 } },
-    actors: (st) => { const a = [A('hero', -150, 470), A('unbinder', 120, 440, -1, 'cast'), A('vellum', 230, 380, -1, 'idle'), A('errata', 230, 500, -1, 'idle')]; (st.run.allies || []).slice(0, 3).forEach((id, i) => a.push(A(id, -250 - (i % 2) * 40, 390 + i * 50, 1, 'idle'))); return a; },
+    actors: (st) => { const a = [A('hero', -150, 470), A('unbinder', 120, 440, -1, 'cast'), A('vellum', 230, 380, -1, 'idle'), A('errata', 230, 500, -1, 'idle')]; (st.run.allies || []).slice(0, 6).forEach((id, i) => a.push(A(id, -250 - (i % 2) * 50, 380 + (i % 4) * 34, 1, 'idle'))); return a; },
     text: (st) => {
       const n = finaleAllies(st);
       return [

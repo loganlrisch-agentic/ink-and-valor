@@ -47,7 +47,7 @@ Object.assign(SECTIONS, {
         `T: I have a confession, Reader. Quillsby isn't the only story with a missing page. Look south.`,
         `To the south the sky is still black. Not cloudy: black, the black of a page nobody has written on. Above the horizon, small and far away, hangs a second moon that has not moved in a month.`,
         `T: The Hundred-Path Tome has a hundred stories in it, and the man with the shears has been through dozens. Every one he cut is stuck in its last night. To find him we go to the Folio, the city at the middle of the book, where the Bindery is. The only ships for the Folio sail from Saltmere. And between us and Saltmere is the Fenmire.`,
-        n.length ? `You are not leaving alone. At the edge of the village wait ${listNames(n)}, packed and ready, arguing about the best way through a bog.` : `Nobody comes to see you off. That's all right. Some stories start with one person and a ribbon.`,
+        n.length ? `At the edge of the village wait ${listNames(n)}, packed and arguing. But not to come with you. "There are a hundred stories stuck in the dark," says ${n[0]}. "We'll do more good spread across the book than marching behind you in a line. Go. Find the man with the shears." Hands are shaken. Somebody cries and pretends it's the dawn. "When you reach the last page, Reader, look over your shoulder. We'll be there."` : `Nobody comes to see you off. That's all right. Some stories start with one person and a ribbon.`,
       ];
     },
     choices: [
@@ -511,10 +511,10 @@ Object.assign(SECTIONS, {
   },
   275: {
     title: 'Crossing', scene: 'deck',
-    actors: (st) => { const a = [A('hero', -60, 470, 1, 'idle'), A('tassel', 20, 380)]; (st.run.allies || []).slice(0, 4).forEach((id, i) => a.push(A(id, 110 + i * 70, 430 + (i % 2) * 50, -1, i % 2 ? 'sit' : 'idle'))); return a; },
+    actors: [A('hero', -60, 470, 1, 'idle'), A('tassel', 20, 380)],
     text: (st) => [
       `The Gull runs north under a sky crowded with stars. For the first time since you woke on the Barrow Moor, nobody is trying to kill you. Somebody has found a fiddle. The sea makes the small talking noises it is supposed to make.`,
-      st.run.allies && st.run.allies.length ? `Your companions sit around the lantern on the deck, telling each other lies about the Fenmire. ${allyNames(st)[0]} keeps looking north, where a light is growing on the horizon: not dawn, but a city, burning with ten thousand windows.` : `You sit alone at the prow and watch the horizon, where a light is growing: not dawn, but a city, burning with ten thousand windows.`,
+      st.run.allies && st.run.allies.length ? `You sit alone at the prow and wonder where ${allyNames(st)[0]} is tonight, and whether they are winning. On the horizon a light is growing: not dawn, but a city, burning with ten thousand windows.` : `You sit alone at the prow and watch the horizon, where a light is growing: not dawn, but a city, burning with ten thousand windows.`,
       `T: Reader. When we get there, I'm going to have to tell you something. About me. About him. I'd like it noted that I'm not looking forward to it.`,
       `T: But not yet. Look. There it is. The Folio.`,
     ],

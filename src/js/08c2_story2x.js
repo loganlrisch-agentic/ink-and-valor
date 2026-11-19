@@ -48,7 +48,7 @@ SECTIONS[340].choices.push({ t: 'Fight through the Library of Teeth', ink: 'crim
 Object.assign(SECTIONS, {
   /* ---------------- the south road ---------------- */
   600: {
-    title: 'The South Road', scene: 'crossroads', actors: (st) => { const a = [A('hero', -120, 470), A('tassel', -30, 380)]; (st.run.allies || []).slice(0, 3).forEach((id, i) => a.push(A(id, -220 - i * 50, 430 + (i % 2) * 50, 1, 'walk'))); return a; },
+    title: 'The South Road', scene: 'crossroads', actors: (st) => { const a = [A('hero', -120, 470), A('tassel', -30, 380)]; return a; },
     text: [
       `The road south runs out of the sunlight like a man walking out of a warm house into the snow. One step it is morning. The next, it is night again, the old night, the one that has lasted a month everywhere except Quillsby.`,
       `The fields on either side are dead. Not winter-dead: stopped. Half-cut wheat stands where the reapers left it. A scarecrow in a farmer's hat turns its head to watch you pass, slowly, the way a sunflower follows the sun.`,
@@ -142,7 +142,7 @@ Object.assign(SECTIONS, {
     choices: [
       { t: 'Stand up and stop them', ink: 'crimson', battle: 'tollmen', win: 608 },
       { t: 'Pay the toll for the whole room (15 crowns)', ink: 'gold', need: { gold: 15 }, take: { gold: 15 }, to: 609 },
-      { t: 'Let Ulfgar handle it', ink: 'crimson', need: { ally: 'ulfgar' }, to: 610, show: { ally: 'ulfgar' } },
+      { t: 'Nod to the huge man drinking alone in the corner. It’s Ulfgar.', ink: 'crimson', need: { ally: 'ulfgar' }, to: 610, show: { ally: 'ulfgar' } },
     ],
   },
   608: {
@@ -167,7 +167,7 @@ Object.assign(SECTIONS, {
     title: 'Ulfgar’s Toll', scene: 'inn', actors: [A('hero', -60, 470, 1, 'cheer'), A('ulfgar', 60, 450, -1, 'roar'), A('mags', 200, 460, -1, 'cheer')],
     once: { xp: 20 },
     text: [
-      `Ulfgar stands up. He keeps standing up for longer than seems possible. When he is finished standing up, the Toll Brothers have to tilt their heads back to see his face.`,
+      `Ulfgar took the south road on business of his own, and has been sitting in the corner the whole time, minding a very small cup. Now he stands up. He keeps standing up for longer than seems possible. When he is finished standing up, the Toll Brothers have to tilt their heads back to see his face.`,
       `"TOLL," says Ulfgar thoughtfully, and picks Barlow up by the belt and throws him through the window. The other three leave by the door, very quickly, which is the polite way.`,
       `"I like this inn," Ulfgar announces to the room. "Nobody hurts this inn." The refugees applaud.`,
     ],
@@ -543,7 +543,7 @@ Object.assign(SECTIONS, {
     choices: [{ t: 'Defend the Gull', ink: 'crimson', battle: 'kraken', win: 277 }],
   },
   277: {
-    title: 'Landfall', scene: 'deck', actors: (st) => { const a = [A('hero', -60, 470, 1, 'cheer'), A('tassel', 20, 380), A('sailor', 220, 450, -1, 'cheer')]; (st.run.allies || []).slice(0, 3).forEach((id, i) => a.push(A(id, 100 + i * 60, 430 + (i % 2) * 50, -1, 'cheer'))); return a; },
+    title: 'Landfall', scene: 'deck', actors: (st) => { const a = [A('hero', -60, 470, 1, 'cheer'), A('tassel', 20, 380), A('sailor', 220, 450, -1, 'cheer')]; return a; },
     once: { xp: 40, gold: 30 },
     text: [
       `The Kraken sinks back through the torn margin with a sound like a library slamming its doors, and the sea stitches itself shut behind it. The crew cheer until they're hoarse. The captain gives you his own hat. It doesn't fit. You wear it anyway.`,

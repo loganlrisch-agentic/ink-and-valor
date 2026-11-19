@@ -22,7 +22,7 @@ function makeEnt(b, kind, type, x, y, forceChamp) {
     const d = ENEMIES[type];
     const ally = kind === 'ally';
     const tier = ally ? 1 + Math.max(0, (st.hero.level - 1)) * 0.08 : (b.def.tier || 1);
-    const hpMul = (ally ? 1 : diff.hp) * tier;
+    const hpMul = (ally ? 1 : diff.hp * (b.crowd || 1)) * tier;
     e = { kind, type, def: d, cfg: d.cfg, hp: Math.round(d.hp * hpMul), maxHp: Math.round(d.hp * hpMul), r: d.r, speed: d.speed, dmgMul: (ally ? 1 : diff.dmg) * (1 + (tier - 1) * 0.6), name: d.name, boss: !!d.boss && !ally, tier };
   }
   Object.assign(e, {
@@ -57,9 +57,13 @@ const Battle = {
     };
     this.b = b; this.active = true; this.paused = false; this.acc = 0; this.hooks = hooks || {};
     b.hero = makeEnt(b, 'hero', null, cx + def.hero.dx, def.hero.y);
-    const allies = (def.allies || []).slice();
-    if (def.party) for (const id of (st.run.allies || []).slice(0, def.party)) if (!allies.some((a) => a.t === id)) allies.push({ t: id });
+    // You fight alone. Story companions only take the field for the final battle,
+    // where everyone you won over along the way arrives at once.
+    const allies = def.finale ? (def.allies || []).slice() : [];
+    if (def.finale && def.party) for (const id of (st.run.allies || []).slice(0, def.party)) if (!allies.some((a) => a.t === id)) allies.push({ t: id });
     allies.forEach((a, i) => { const e = makeEnt(b, 'ally', a.t, clamp(cx + (a.dx != null ? a.dx : def.hero.dx - 50 - i * 40), 40, W - 40), a.y != null ? a.y : clamp(def.hero.y + (i % 2 ? 60 : -60) * (1 + Math.floor(i / 2) * 0.6), FIELD.top, FIELD.bot)); e.facing = 1; });
+    // the more friends answer the call, the more the villains have saved up for them
+    b.crowd = def.finale ? 1 + 0.22 * Math.max(0, allies.length - 3) : 1;
     this.spawnWave(0, true);
     for (const tr of (b.P && b.P.onStart) || []) { try { runFx(trigCtx(b, b.hero, null), tr.fx, { x: b.hero.x, y: b.hero.y, e: b.hero }); } catch (err) { console.warn(err); } }
     if (def.boss) { const boss = b.ents.find((e) => e.boss); if (boss) { boss.state = 'roar'; boss.st = 0; } }

@@ -46,7 +46,7 @@ function makeChamp(b, kind, type) {
   if (kind === 'ally') { S.melee *= 0.8; S.spellMul *= 0.8; S.heal *= 0.85; }
   if (kind === 'foe' && b.def.champDmg) { S.melee *= b.def.champDmg; S.spellMul *= b.def.champDmg; }
   const diff = kind === 'foe' && st && st.settings.difficulty === 'story' ? 0.8 : 1;
-  const hp = Math.round(d.hp * (1 + 0.11 * (lvl - 1)) * (1 + P.maxHp) * diff * (kind === 'foe' ? (b.def.champHp || 1) : 0.8));
+  const hp = Math.round(d.hp * (1 + 0.11 * (lvl - 1)) * (1 + P.maxHp) * diff * (kind === 'foe' ? (b.def.champHp || 1) * (b.crowd || 1) : 0.8));
   const acd = {}; for (const id of d.abil) acd[id] = rand(1.5, 5);
   return {
     kind, type, champ: true, cfg: d.cfg(), hp, maxHp: hp, r: d.boss ? 18 : 15, speed: S.move, dmgMul: kind === 'ally' ? 0.8 : 1, name: d.name, boss: !!d.boss && kind === 'foe',
