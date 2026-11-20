@@ -9,6 +9,27 @@ const Arena = {
   hpFrac: 1,
   origin: 'knight',
   BEST_KEY: 'inkvalor_arena_best',
+  AUTO_KEY: 'inkvalor_arena_auto',
+  get autoLoadout() { try { return localStorage.getItem(this.AUTO_KEY) === '1'; } catch (e) { return false; } },
+  set autoLoadout(v) { try { localStorage.setItem(this.AUTO_KEY, v ? '1' : '0'); } catch (e) { /* storage may be blocked */ } },
+
+  /* how strong an ability is for this hero: big capstones first, then high requirements, then fit with the hero's best stats */
+  score(id) {
+    const a = AB[id], st = Game.st, req = a.req || {};
+    let s = (a.capstone ? 60 : 0) + (a.minLevel || 1) * 4;
+    for (const k in req) s += req[k] * 1.5 + (st.hero.stats[k] || 0) * 0.6;
+    if (a.type === 'passive' && a.P) s += Object.keys(a.P).length * 5;
+    if (a.type === 'active' && a.cd) s += Math.min(a.cd, 30) * 0.3;
+    return s;
+  },
+  autoPick() {
+    const st = Game.st, R = st.run;
+    const ready = knownSkills(st).filter((id) => abilityStatus(st, id).ok);
+    for (const [type, key] of [['active', 'actives'], ['passive', 'passives']]) {
+      const best = ready.filter((id) => AB[id].type === type).sort((a, b) => this.score(b) - this.score(a)).slice(0, 5);
+      R[key] = best.concat([null, null, null, null, null]).slice(0, 5);
+    }
+  },
 
   best() { try { return +(localStorage.getItem(this.BEST_KEY) || 0); } catch (e) { return 0; } },
   setBest(n) { try { if (n > this.best()) localStorage.setItem(this.BEST_KEY, String(n)); } catch (e) { /* storage may be blocked */ } },
@@ -119,7 +140,7 @@ const Arena = {
     const kit = ORIGIN_KIT[h.origin];
     const main = STAT_KEYS.filter((k) => k !== 'heart').sort((a, b) => kit.stats[b] - kit.stats[a])[0];
     while (h.points > 0) { h.stats[h.points % 3 === 0 ? 'heart' : main]++; h.points--; }
-    fixLoadout(st, true);
+    if (this.autoLoadout) this.autoPick(); else fixLoadout(st, true);
   },
 
   results(b, won, el) {
@@ -134,7 +155,7 @@ const Arena = {
         <p class="tip">Choose a boon.</p>
         <div class="boons">${opts.map((o, i) => `<button class="boon" data-i="${i}">${o.icon ? `<img src="${o.icon}" alt="">` : ''}<b${o.color ? ` style="color:${o.color}"` : ''}>${escapeHtml(o.name)}</b><em>${escapeHtml(o.desc)}</em></button>`).join('')}</div>
         <button class="btn ghost sm" data-act="quit">Leave the Arena</button></div>`;
-      el.querySelectorAll('[data-i]').forEach((btn) => btn.addEventListener('click', () => { Sound.play('click'); opts[+btn.dataset.i].go(); this.closeBattle(); this.next(); }));
+      el.querySelectorAll('[data-i]').forEach((btn) => btn.addEventListener('click', () => { Sound.play('click'); opts[+btn.dataset.i].go(); if (this.autoLoadout) { this.autoPick(); this.closeBattle(); this.next(); } else this.showLoadout(el); }));
     } else {
       this.setBest(this.wave - 1);
       el.innerHTML = `<div class="card lose arena-card"><h2>Fallen on Wave ${this.wave}</h2>
@@ -146,6 +167,35 @@ const Arena = {
     }
     el.querySelector('[data-act=quit]').addEventListener('click', () => this.exit());
     el.classList.remove('hide');
+  },
+  /* ---------- choose your loadout between waves ---------- */
+  showLoadout(el) {
+    const st = Game.st, R = st.run;
+    const draw = () => {
+      const slots = (list, type) => list.map((id, i) => `<button class="lslot ${type}" data-clear="${type}:${i}" title="${id ? escapeHtml(AB[id].name + ': ' + AB[id].desc) : 'Empty'}">${id ? `<img src="${Icons.skill(id)}" alt=""><span>${AB[id].name}</span>` : `<span class="e">${type === 'active' ? i + 1 : '◇'}</span>`}</button>`).join('');
+      // only what this hero can use right now, strongest first
+      const ready = knownSkills(st).filter((id) => abilityStatus(st, id).ok).sort((a, b) => this.score(b) - this.score(a));
+      const tile = (id) => { const a = AB[id], on = (a.type === 'active' ? R.actives : R.passives).includes(id); return `<button class="atile ${a.type} ${on ? 'on' : ''}" data-skill="${id}" title="${escapeHtml(a.name + ': ' + a.desc)}"><img src="${Icons.skill(id)}" alt=""><span>${a.name}</span></button>`; };
+      const group = (type, label) => { const ids = ready.filter((id) => AB[id].type === type); return ids.length ? `<div class="agroup"><h4>${label} <small>${ids.length} unlocked</small></h4><div class="atiles">${ids.map(tile).join('')}</div></div>` : ''; };
+      el.innerHTML = `<div class="card win arena-card arena-load"><h2>Your Loadout</h2>
+        <p class="tip">Tap to swap abilities in and out. Wave ${this.wave + 1} is next.</p>
+        <div class="lrow"><b>Spells</b><div class="loadout">${slots(R.actives, 'active')}</div></div>
+        <div class="lrow"><b>Passives</b><div class="loadout">${slots(R.passives, 'passive')}</div></div>
+        <div class="arena-spells">${group('active', 'Spells')}${group('passive', 'Passives')}</div>
+        <label class="arena-auto"><input type="checkbox" ${this.autoLoadout ? 'checked' : ''}> Always pick the strongest for me and skip this screen</label>
+        <div class="arena-load-btns"><button class="btn ghost" data-act="auto">Auto-pick strongest</button><button class="btn" data-act="go">Fight wave ${this.wave + 1}</button></div></div>`;
+      el.querySelectorAll('[data-clear]').forEach((b) => b.addEventListener('click', () => { const [type, i] = b.dataset.clear.split(':'); (type === 'active' ? R.actives : R.passives)[+i] = null; Sound.play('click'); draw(); }));
+      el.querySelectorAll('[data-skill]').forEach((b) => b.addEventListener('click', () => {
+        const id = b.dataset.skill, L = AB[id].type === 'active' ? R.actives : R.passives;
+        const at = L.indexOf(id);
+        if (at >= 0) L[at] = null; else { const e = L.indexOf(null); if (e < 0) { b.classList.add('shake'); setTimeout(() => b.classList.remove('shake'), 400); return; } L[e] = id; }
+        Sound.play('click'); draw();
+      }));
+      el.querySelector('.arena-auto input').addEventListener('change', (e) => { this.autoLoadout = e.target.checked; if (e.target.checked) { this.autoPick(); draw(); } });
+      el.querySelector('[data-act=auto]').addEventListener('click', () => { this.autoPick(); Sound.play('click'); draw(); });
+      el.querySelector('[data-act=go]').addEventListener('click', () => { Sound.play('page'); this.closeBattle(); this.next(); });
+    };
+    draw();
   },
   closeBattle() { Battle.stop(); BView.end(); HUD.hide(); HUD.hurtT = 0; R3.setFx({ uHurt: 0, uGrey: 0, uFlash: 0 }); R3.shake = 0; R3.zoom = 0; },
   exit() {

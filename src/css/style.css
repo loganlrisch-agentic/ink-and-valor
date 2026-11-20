@@ -345,3 +345,20 @@ button { font: inherit; color: inherit; cursor: pointer; }
   #hTip { font-size: 13px; padding: 4px 10px; }
   #hTitle { font-size: 17px; }
 }
+.arena-load { width: min(760px, 94vw); max-height: 92vh; display: flex; flex-direction: column; gap: 6px; }
+.arena-load .loadout { display: flex; gap: 6px; flex-wrap: wrap; }
+.arena-load .lslot { width: 62px; height: 78px; }
+.arena-load .lslot img { width: 46px; height: 46px; }
+.arena-spells { overflow-y: auto; max-height: 34vh; padding: 6px 2px; border-top: 1px solid rgba(90,60,30,.3); margin-top: 4px; text-align: left; }
+.agroup h4 { margin: 4px 0; font-family: 'Cinzel', serif; font-size: 13px; color: #4a3424; } .agroup h4 small { font-family: 'IM Fell English', serif; font-weight: 400; color: #8a6a4a; }
+.atiles { display: flex; flex-wrap: wrap; gap: 6px; }
+.atile { width: 76px; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px 3px; border: 2px solid #c8b088; border-radius: 8px; background: rgba(255,250,235,.55); font: inherit; cursor: pointer; }
+.atile img { width: 42px; height: 42px; border-radius: 6px; } .atile.passive img { border-radius: 50%; }
+.atile span { font-family: 'Cinzel', serif; font-size: 10px; line-height: 1.1; text-align: center; color: #2a1a10; }
+.atile.on { border-color: #b8862a; background: #f6dc9a; box-shadow: 0 0 0 2px rgba(184,134,42,.35); }
+.atile.shake { animation: shake .35s; }
+.arena-auto { font-size: 13px; display: flex; align-items: center; gap: 6px; justify-content: center; color: #4a3424; }
+.arena-load-btns { display: flex; gap: 8px; justify-content: center; }
+.spell.shake { animation: shake .35s; } @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+@media (max-width: 600px) { .atile { width: 64px; } .arena-load .lslot { width: 52px; height: 66px; } .arena-load .lslot img { width: 38px; height: 38px; } .arena-load .lrow > b { width: 54px; font-size: 11px; } }
+#hResults:not(.hide) { position: absolute; inset: 0; z-index: 6; background: rgba(10,5,2,.45); pointer-events: auto; }
