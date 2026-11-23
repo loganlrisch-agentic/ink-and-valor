@@ -38,7 +38,7 @@ const Arena = {
   pools() {
     if (this._pools) return this._pools;
     const mk = () => ({ foes: new Set(), bosses: new Set(), scenes: new Set() });
-    const P = { I: mk(), II: mk(), III: mk(), IV: mk() };
+    const P = { I: mk(), II: mk(), III: mk(), IV: mk(), V: mk() };
     const chOf = (id) => { for (const [lo, hi, k] of CHAPTER_RANGES) if (id >= lo && id <= hi) return k; return 'I'; };
     for (const sid of Object.keys(SECTIONS)) {
       const s = SECTIONS[sid]; if (!Array.isArray(s.choices)) continue;
@@ -57,7 +57,7 @@ const Arena = {
     for (const k in P) for (const f of ['foes', 'bosses', 'scenes']) P[k][f] = [...P[k][f]];
     return (this._pools = P);
   },
-  eraFor(n) { return n <= 4 ? ['I'] : n <= 9 ? ['I', 'II'] : n <= 14 ? ['II', 'III'] : n <= 19 ? ['III', 'IV'] : ['I', 'II', 'III', 'IV']; },
+  eraFor(n) { return n <= 4 ? ['I'] : n <= 9 ? ['I', 'II'] : n <= 14 ? ['II', 'III'] : n <= 19 ? ['III', 'IV'] : ['II', 'III', 'IV', 'V']; },
   pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; },
 
   /* ---------- the title-page picker ---------- */
@@ -91,7 +91,7 @@ const Arena = {
     const n = ++this.wave;
     const P = this.pools(), eras = this.eraFor(n);
     const foes = [].concat(...eras.map((k) => P[k].foes)), bosses = [].concat(...eras.map((k) => P[k].bosses));
-    const scenes = [].concat(...eras.map((k) => P[k].scenes));
+    const scenes = [].concat(...eras.map((k) => P[k].scenes)).filter((sc) => sc !== 'bindery');
     const isBoss = n % 5 === 0 && bosses.length;
     const count = Math.min(9, 3 + Math.floor(n / 2));
     const spot = (i, edge) => edge ? { edge: i % 2 ? -1 : 1, y: 390 + ((i * 47) % 140) } : { dx: (i % 2 ? -1 : 1) * (150 + ((i * 37) % 120)), y: 390 + ((i * 53) % 140) };

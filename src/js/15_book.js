@@ -471,7 +471,7 @@ const Book = {
         const known = Object.keys(AB).filter((id) => st.run.classes.includes(AB[id].cls)).length;
         const row = (id) => { const a = AB[id], s2 = abilityStatus(st, id), on = (a.type === 'active' ? st.run.actives : st.run.passives).includes(id); return `<button class="spell ${a.type} ${a.capstone ? 'capstone' : ''} ${s2.ok ? '' : 'locked'} ${on ? 'on' : ''}" data-skill="${id}" ${s2.ok ? '' : 'disabled'}><img src="${Icons.skill(id)}"><div><b>${a.name}</b><span>${a.desc}</span><em>${a.capstone ? '<i class="cap">Capstone</i> ' : ''}${a.type === 'active' ? `Spell · ${a.cd}s` : 'Passive'}${s2.meets ? '' : ' · needs ' + reqText(a.req, a.minLevel)}</em></div></button>`; };
         const filt = this.sheetCls && st.run.classes.includes(this.sheetCls) ? this.sheetCls : st.run.classes[0];
-        body = `<p class="sub">Five spells for your bar and five passives that are always on. Tap an ability to equip it; tap a slot to empty it. You know <b>${known}</b> of ${Object.keys(AB).length} abilities.</p>
+        body = `<p class="sub">Five spells for your bar and five passives that are always on. Tap an ability to equip it; tap a slot to empty it. You know <b>${known}</b> of ${Object.keys(AB).length} abilities. <button class="btn sm ghost" data-autopick>Auto-pick strongest</button></p>
           <div class="lrow"><b>Spells</b><div class="loadout">${slots(st.run.actives, 'active')}</div></div>
           <div class="lrow"><b>Passives</b><div class="loadout">${slots(st.run.passives, 'passive')}</div></div>
           <div class="clstabs">${Object.keys(CLASSES).map((k) => { const kn = st.run.classes.includes(k); return `<button class="clstab ${k === filt ? 'on' : ''} ${kn ? '' : 'unknown'}" ${kn ? `data-cls="${k}"` : 'disabled'} title="${kn ? CLASSES[k].name : `${CLASSES[k].name}: learn from ${CLASSES[k].teacher}`}"><img src="${Icons.cls(k)}"><span>${kn ? CLASSES[k].name : '???'}</span></button>`; }).join('')}</div>
@@ -510,6 +510,7 @@ const Book = {
       q('[data-skill]', (b) => { const id = b.dataset.skill, a = AB[id], L = a.type === 'active' ? st.run.actives : st.run.passives; if (L.includes(id)) return; const e = L.indexOf(null); L[e >= 0 ? e : 4] = id; if (st.run.cleared) delete st.run.cleared[id]; st.run.loadout = st.run.actives; Sound.play('click'); });
       q('[data-clear]', (b) => { const [type, i] = b.dataset.clear.split(':'); const L = type === 'active' ? st.run.actives : st.run.passives; if (L[+i]) { st.run.cleared = st.run.cleared || {}; st.run.cleared[L[+i]] = 1; } L[+i] = null; st.run.loadout = st.run.actives; });
       q('[data-cls]', (b) => { this.sheetCls = b.dataset.cls; });
+      q('[data-autopick]', () => { Arena.autoPick(); st.run.loadout = st.run.actives; Sound.play('click'); });
       q('[data-front]', (b) => { const id = b.dataset.front, al = st.run.allies; const k = al.indexOf(id); if (k > 0) { al.splice(k, 1); al.unshift(id); } Sound.play('click'); });
     };
     wire();
@@ -521,7 +522,7 @@ const Book = {
     R3.setWorld('moor'); R3.clearActors(); Music.setTrack('theme');
     const sv = Game.peek(), has = !!sv;
     const t = document.getElementById('title');
-    t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Four Chapters · The Unending Night</div>
+    t.innerHTML = `<div class="cover"><div class="cv-frame"><div class="cv-top">A Hundred-Path Tome</div><h1>Ink <span>&amp;</span> Valor</h1><div class="cv-sub">Five Chapters · The Unending Night</div>
       <div class="cv-btns">${has ? `<button class="btn big" data-t="cont">Continue Reading<small>${escapeHtml(sv.hero.name)} · Lv ${sv.hero.level} ${escapeHtml(CLASSES[sv.hero.origin].name)}</small></button>` : ''}<button class="btn big ${has ? 'ghost' : ''}" data-t="new">${has ? 'A New Reader' : 'Open the Book'}</button><button class="btn big arena-btn" data-t="arena">The Arena<small>${Arena.best() ? `Endless waves · your best: wave ${Arena.best()}` : 'Endless waves · straight into a fight'}</small></button><button class="lnk" data-t="code">Save code</button></div>
       <div class="cv-foot">Tap or click to fight · keys 1-5 for spells, Q W E for potions</div></div></div>`;
     t.classList.add('on');

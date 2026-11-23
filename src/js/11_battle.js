@@ -206,6 +206,15 @@ const Battle = {
       if (e.state === 'bones') { if (e.st > 3) { e.state = 'rise'; e.st = 0; e.hp = Math.round(e.maxHp * 0.5); Sound.play('bone'); } continue; }
       if (e.state === 'rise') { e.alpha = clamp(e.st / 0.6, 0, 1); if (e.st > 0.7) { e.state = 'idle'; e.st = 0; e.alpha = 1; } continue; }
       if (e.shieldT > 0) { e.shieldT -= dt; if (e.shieldT <= 0) e.shield = 0; }
+      // boss rage: at half health a boss speeds up and calls for help
+      if (e.kind === 'foe' && e.boss && !e.champ && !e.enraged && !b.def.nonlethal && e.hp > 0 && e.hp < e.maxHp * 0.5) {
+        e.enraged = true; e.speed *= 1.22; e.dmgMul *= 1.12; e.def = Object.assign({}, e.def, { cd: (e.def.cd || 1.5) * 0.75 });
+        b.banner = { text: `${e.name} is enraged!`, t: 0, dur: 1.8 }; Sound.play('shout'); R3.shake = Math.max(R3.shake || 0, 0.5);
+        burst(b, e.x, e.y - 20, 'ember', 18, { c: '#ff3a1a' });
+        const pool = [].concat(...b.def.waves).map((s) => s.t).filter((t) => ENEMIES[t] && !ENEMIES[t].boss && !CHAMPS[t] && !(ENEMIES[t].ally));
+        const add = e.def.minion || (pool.length ? pool[Math.floor(Math.random() * pool.length)] : 'inkspawn');
+        for (const s of [-1, 1]) { const m = makeEnt(b, 'foe', add, clamp(e.x + s * 110, 40, b.W - 40), clamp(e.y + s * 40, FIELD.top, FIELD.bot)); m.state = 'rise'; m.st = 0; m.alpha = 0; m.facing = m.x > b.hero.x ? -1 : 1; burst(b, m.x, m.y - 10, 'ink', 12); }
+      }
       if (e.kind === 'foe' && (e.elite || e.boss)) { e.fxT = (e.fxT || 0) - dt; if (e.fxT <= 0) { e.fxT = e.boss ? 0.09 : 0.2; burst(b, e.x + rand(-14, 14) * (e.boss ? 2 : 1), e.y - rand(6, 40), 'ember', 1, { c: e.elite ? ELITES[e.elite].c : (e.def && e.def.undead ? '#7fd1ff' : e.def && e.def.inkborn ? '#a06aff' : '#ff4a2a') }); } }
       if (e.stacks) for (const k in e.stacks) { const sk = e.stacks[k]; sk.t -= dt; if (sk.t <= 0) delete e.stacks[k]; }
       if (e.life != null) { e.life -= dt; if (e.life <= 0) { killEnt(b, e, null, true); continue; } }
